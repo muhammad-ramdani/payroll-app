@@ -1,5 +1,6 @@
 import DeleteDialog from '@/components/data-karyawan/DeleteDialog';
 import DetailModal from '@/components/data-karyawan/DetailModal';
+import EditModal from '@/components/data-karyawan/EditModal';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -36,8 +37,9 @@ export default function DataKaryawan() {
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
     const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
-    const [copiedField, setCopiedField] = React.useState<string | null>(null); // State untuk melacak tombol yang diklik
+    const [copiedField, setCopiedField] = React.useState<string | null>(null);
 
     const table = useReactTable({
         data: employees,
@@ -77,11 +79,18 @@ export default function DataKaryawan() {
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
                                 <DropdownMenuItem
                                     onClick={() => {
-                                        setSelectedEmployee(row.original); // Simpan data karyawan yang dipilih
-                                        setIsDetailDialogOpen(true); // Buka dialog
+                                        setSelectedEmployee(row.original);
+                                        setIsEditDialogOpen(true);
+                                    }}
+                                >
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        setSelectedEmployee(row.original);
+                                        setIsDetailDialogOpen(true);
                                     }}
                                 >
                                     Lihat Detail
@@ -140,6 +149,10 @@ export default function DataKaryawan() {
         navigator.clipboard.writeText(value);
         setCopiedField(field); // Tandai field yang telah disalin
         setTimeout(() => setCopiedField(null), 2000); // Reset setelah 2 detik
+    };
+
+    const handleUpdate = (id: number, name: string) => {
+        setEmployees((prev) => prev.map((employee) => (employee.id === id ? { ...employee, name } : employee)));
     };
 
     return (
@@ -219,6 +232,8 @@ export default function DataKaryawan() {
                 handleCopy={handleCopy}
                 copiedField={copiedField}
             />
+
+            <EditModal open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} employee={selectedEmployee} onUpdate={handleUpdate} />
 
             <DeleteDialog open={isDialogOpen} onClose={setIsDialogOpen} onDelete={handleDelete} />
         </AppLayout>

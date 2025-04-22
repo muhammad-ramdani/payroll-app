@@ -22,6 +22,7 @@ Route::middleware(['auth'])->group(function () {
         // ini route untuk data karyawan
         Route::get('data-karyawan', [EmployeeController::class, 'index'])->name('data-karyawan');
         Route::delete('employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+        Route::put('data-karyawan/{employee}', [EmployeeController::class, 'update'])->name('data-karyawan.update');
     });
 });
 

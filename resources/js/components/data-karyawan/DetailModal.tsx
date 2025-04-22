@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import Modal from '@/components/ui/modal';
 import { Table, TableBody, TableCell, TableRowNonBorder } from '@/components/ui/table';
-import { Employee } from '@/types'; // Sesuaikan path jika berbeda
+import { Employee } from '@/types';
 import { Check, Copy } from 'lucide-react';
 
 interface DetailModalProps {
