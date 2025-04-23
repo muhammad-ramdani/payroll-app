@@ -1,19 +1,20 @@
 import { Button } from '@/components/ui/button';
 import Modal from '@/components/ui/modal';
 import { Table, TableBody, TableCell, TableRowNonBorder } from '@/components/ui/table';
-import { Employee } from '@/types';
+import { EmployeeModalProps } from '@/types';
 import { Check, Copy } from 'lucide-react';
+import React from 'react';
 
-interface DetailModalProps {
-    open: boolean;
-    onClose: (open: boolean) => void;
-    selectedEmployee: Employee | null;
-    handleCopy: (field: string, value: string) => void;
-    copiedField: string | null;
-}
+export default function DetailModal({ open, onClose, employee }: EmployeeModalProps) {
+    const [localCopiedField, setLocalCopiedField] = React.useState<string | null>(null);
 
-export default function DetailModal({ open, onClose, selectedEmployee, handleCopy, copiedField }: DetailModalProps) {
-    if (!selectedEmployee) return null;
+    const handleCopy = (field: string, value: string) => {
+        navigator.clipboard.writeText(value);
+        setLocalCopiedField(field);
+        setTimeout(() => setLocalCopiedField(null), 2000);
+    };
+
+    if (!employee) return null;
 
     return (
         <Modal open={open} onClose={onClose} title="Detail Data Karyawan">
@@ -23,23 +24,27 @@ export default function DetailModal({ open, onClose, selectedEmployee, handleCop
                         <TableRowNonBorder>
                             <TableCell>Nama</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{selectedEmployee.name}</TableCell>
+                            <TableCell>{employee.name}</TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
                             <TableCell>Nomer HP</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{selectedEmployee.phone}</TableCell>
+                            <TableCell>{employee.phone}</TableCell>
                             <TableCell>
-                                <Button variant="outline" size="icon" onClick={() => handleCopy('phone', selectedEmployee.phone)}>
-                                    {copiedField === 'phone' ? <Check /> : <Copy />}
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => handleCopy('phone', employee.phone)} // Kirim field dan value
+                                >
+                                    {localCopiedField === 'phone' ? <Check /> : <Copy />}
                                 </Button>
                             </TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
                             <TableCell>Alamat</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{selectedEmployee.address}</TableCell>
+                            <TableCell>{employee.address}</TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
@@ -51,7 +56,7 @@ export default function DetailModal({ open, onClose, selectedEmployee, handleCop
                                     day: 'numeric',
                                     month: 'long',
                                     year: 'numeric',
-                                }).format(new Date(selectedEmployee.hire_date))}
+                                }).format(new Date(employee.hire_date))}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
@@ -59,14 +64,14 @@ export default function DetailModal({ open, onClose, selectedEmployee, handleCop
                             <TableCell>Nomor Rekening</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>
-                                <div className="mb-2">{selectedEmployee.account_number}</div>
+                                <div className="mb-2">{employee.account_number}</div>
                                 <span className="text-sm tracking-wide text-neutral-500 dark:text-neutral-400">
-                                    {selectedEmployee.bank_name} - {selectedEmployee.account_name}
+                                    {employee.bank_name} - {employee.account_name}
                                 </span>
                             </TableCell>
                             <TableCell>
-                                <Button variant="outline" size="icon" onClick={() => handleCopy('account_number', selectedEmployee.account_number)}>
-                                    {copiedField === 'account_number' ? <Check /> : <Copy />}
+                                <Button variant="outline" size="icon" onClick={() => handleCopy('account_number', employee.account_number)}>
+                                    {localCopiedField === 'account_number' ? <Check /> : <Copy />}
                                 </Button>
                             </TableCell>
                         </TableRowNonBorder>
@@ -78,14 +83,14 @@ export default function DetailModal({ open, onClose, selectedEmployee, handleCop
                                     style: 'currency',
                                     currency: 'IDR',
                                     maximumFractionDigits: 0,
-                                }).format(selectedEmployee.basic_salary)}
+                                }).format(employee.basic_salary)}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
                             <TableCell>Jatah Hari Libur (Bonus)</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{selectedEmployee.paid_holidays} hari</TableCell>
+                            <TableCell>{employee.paid_holidays} hari</TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
@@ -96,26 +101,26 @@ export default function DetailModal({ open, onClose, selectedEmployee, handleCop
                                     style: 'currency',
                                     currency: 'IDR',
                                     maximumFractionDigits: 0,
-                                }).format(selectedEmployee.daily_allowance)}
+                                }).format(employee.daily_allowance)}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
                             <TableCell>Potongan BPJS Kesehatan</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{selectedEmployee.bpjs_health}%</TableCell>
+                            <TableCell>{employee.bpjs_health}%</TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
                             <TableCell>Potongan BPJS Ketenagakerjaan</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{selectedEmployee.bpjs_employment}%</TableCell>
+                            <TableCell>{employee.bpjs_employment}%</TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
                             <TableCell>Potongan PPh</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{selectedEmployee.income_tax}%</TableCell>
+                            <TableCell>{employee.income_tax}%</TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                     </TableBody>

@@ -40,17 +40,9 @@ class EmployeeController extends Controller
             'income_tax' => 'required|integer|min:0|max:100',
         ]);
 
-        Employee::create($validated);
-    }
+        $employee = Employee::create($validated);
 
-    public function show(Employee $employee)
-    {
-        // 
-    }
-
-    public function edit(Employee $employee)
-    {
-        // 
+        return response()->json($employee);
     }
 
     public function update(Request $request, Employee $employee)

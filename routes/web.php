@@ -20,9 +20,10 @@ Route::middleware(['auth'])->group(function () {
         })->name('dashboard');
 
         // ini route untuk data karyawan
-        Route::get('data-karyawan', [EmployeeController::class, 'index'])->name('data-karyawan');
-        Route::delete('employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-        Route::put('data-karyawan/{employee}', [EmployeeController::class, 'update'])->name('data-karyawan.update');
+        Route::get('data-karyawan', [EmployeeController::class, 'index']);
+        Route::post('data-karyawan', [EmployeeController::class, 'store']);
+        Route::put('data-karyawan/{employee}', [EmployeeController::class, 'update']);
+        Route::delete('data-karyawan/{employee}', [EmployeeController::class, 'destroy']);
     });
 });
 

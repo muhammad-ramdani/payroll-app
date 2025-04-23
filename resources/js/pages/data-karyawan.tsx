@@ -1,6 +1,7 @@
 import DeleteDialog from '@/components/data-karyawan/DeleteDialog';
 import DetailModal from '@/components/data-karyawan/DetailModal';
 import EditModal from '@/components/data-karyawan/EditModal';
+import CreateModal from '@/components/data-karyawan/create-modal';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -31,15 +32,14 @@ import * as React from 'react';
 
 export default function DataKaryawan() {
     const [employees, setEmployees] = React.useState<Employee[]>(usePage<{ employees: Employee[] }>().props.employees);
-
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-    const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
-    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
     const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
-    const [copiedField, setCopiedField] = React.useState<string | null>(null);
+    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+    const [sorting, setSorting] = React.useState<SortingState>([]);
+    const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+    const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
     const table = useReactTable({
         data: employees,
@@ -124,36 +124,12 @@ export default function DataKaryawan() {
         },
     });
 
-    const handleDelete = async () => {
-        if (selectedEmployee) {
-            try {
-                const response = await fetch(`/employees/${selectedEmployee.id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    },
-                });
-                if (response.ok) {
-                    setEmployees((prevEmployees) => prevEmployees.filter((employee) => employee.id !== selectedEmployee.id));
-                    setIsDialogOpen(false);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat menghapus data.');
-            }
-        }
-    };
+    const updateEmployee = (updatedEmployee: Employee) =>
+        setEmployees((prev) => prev.map((employee) => (employee.id === updatedEmployee.id ? updatedEmployee : employee)));
 
-    const handleCopy = (field: string, value: string) => {
-        navigator.clipboard.writeText(value);
-        setCopiedField(field); // Tandai field yang telah disalin
-        setTimeout(() => setCopiedField(null), 2000); // Reset setelah 2 detik
-    };
+    const createEmployee = (newEmployee: Employee) => setEmployees((prev) => [...prev, newEmployee]);
 
-    const handleUpdate = (id: number, name: string) => {
-        setEmployees((prev) => prev.map((employee) => (employee.id === id ? { ...employee, name } : employee)));
-    };
+    const deleteEmployee = (id: number) => setEmployees((prev) => prev.filter((employee) => employee.id !== id));
 
     return (
         <AppLayout>
@@ -166,9 +142,12 @@ export default function DataKaryawan() {
                         onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
                         className="max-w-sm"
                     />
+                    <button onClick={() => setIsCreateModalOpen(true)} className="ml-auto rounded bg-blue-600 px-4 py-2 text-white">
+                        Tambah Karyawan
+                    </button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="ml-auto">
+                            <Button variant="outline" className="ml-2">
                                 Columns <ChevronDown />
                             </Button>
                         </DropdownMenuTrigger>
@@ -225,17 +204,10 @@ export default function DataKaryawan() {
                 </div>
             </div>
 
-            <DetailModal
-                open={isDetailDialogOpen}
-                onClose={setIsDetailDialogOpen}
-                selectedEmployee={selectedEmployee}
-                handleCopy={handleCopy}
-                copiedField={copiedField}
-            />
-
-            <EditModal open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} employee={selectedEmployee} onUpdate={handleUpdate} />
-
-            <DeleteDialog open={isDialogOpen} onClose={setIsDialogOpen} onDelete={handleDelete} />
+            <CreateModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} addEmployee={createEmployee} />
+            <DetailModal open={isDetailDialogOpen} onClose={() => setIsDetailDialogOpen(false)} employee={selectedEmployee} />
+            <EditModal open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} employee={selectedEmployee} onUpdate={updateEmployee} />
+            <DeleteDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} onDelete={deleteEmployee} employee={selectedEmployee} />
         </AppLayout>
     );
 }

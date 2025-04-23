@@ -1,11 +1,5 @@
+import { EditModalProps, Employee } from '@/types';
 import React, { useEffect, useState } from 'react';
-
-interface EditModalProps {
-    open: boolean;
-    onClose: () => void;
-    employee: { id: number; name: string } | null;
-    onUpdate: (id: number, name: string) => void;
-}
 
 export default function EditModal({ open, onClose, employee, onUpdate }: EditModalProps) {
     const [name, setName] = useState('');
@@ -28,7 +22,7 @@ export default function EditModal({ open, onClose, employee, onUpdate }: EditMod
         });
 
         if (response.ok) {
-            onUpdate(employee.id, name);
+            onUpdate({ ...employee, name } as Employee); // Pastikan semua properti dari employee disertakan
             onClose();
         } else {
             alert('Gagal memperbarui data.');

@@ -8,14 +8,30 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { DeleteDialogProps } from '@/types';
 
-interface DeleteDialogProps {
-    open: boolean;
-    onClose: (open: boolean) => void;
-    onDelete: () => void;
-}
+export default function DeleteDialog({ open, onClose, onDelete, employee }: DeleteDialogProps) {
+    const handleDelete = async () => {
+        if (employee) {
+            try {
+                const response = await fetch(`/data-karyawan/${employee.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                });
+                if (response.ok) {
+                    onDelete(employee.id); // Panggil fungsi onDelete untuk memperbarui state
+                    onClose();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghapus data.');
+            }
+        }
+    };
 
-export default function DeleteDialog({ open, onClose, onDelete }: DeleteDialogProps) {
     return (
         <AlertDialog open={open} onOpenChange={onClose}>
             <AlertDialogContent>
@@ -24,8 +40,8 @@ export default function DeleteDialog({ open, onClose, onDelete }: DeleteDialogPr
                     <AlertDialogDescription>Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => onClose(false)}>Batal</AlertDialogCancel>
-                    <AlertDialogAction onClick={onDelete}>Hapus</AlertDialogAction>
+                    <AlertDialogCancel onClick={onClose}>Batal</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>Hapus</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

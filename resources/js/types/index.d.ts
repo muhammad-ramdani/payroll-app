@@ -58,3 +58,24 @@ export interface Employee {
     bpjs_employment: number;
     income_tax: number;
 }
+
+export interface ModalProps {
+    open: boolean;
+    onClose: () => void;
+}
+
+export interface EmployeeModalProps extends ModalProps {
+    employee: Employee | null;
+}
+
+export interface CreateModalProps extends ModalProps {
+    addEmployee: (employee: Employee) => void;
+}
+
+export interface EditModalProps extends EmployeeModalProps {
+    onUpdate: (employee: Employee) => void;
+}
+
+export interface DeleteDialogProps extends EmployeeModalProps {
+    onDelete: (id: number) => void;
+}
