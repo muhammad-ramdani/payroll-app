@@ -1,7 +1,7 @@
-import DeleteDialog from '@/components/data-karyawan/DeleteDialog';
-import DetailModal from '@/components/data-karyawan/DetailModal';
-import EditModal from '@/components/data-karyawan/EditModal';
-import CreateModal from '@/components/data-karyawan/create-modal';
+import CreateModal from '@/components/employee-components/CreateModal';
+import DeleteDialog from '@/components/employee-components/DeleteDialog';
+import DetailModal from '@/components/employee-components/DetailModal';
+import EditModal from '@/components/employee-components/EditModal';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Employee } from '@/types';
+import { BreadcrumbItem, Employee } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import {
     ColumnFiltersState,
@@ -27,8 +27,15 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
 import * as React from 'react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Data Karyawan',
+        href: '/data-karyawan',
+    },
+];
 
 export default function DataKaryawan() {
     const [employees, setEmployees] = React.useState<Employee[]>(usePage<{ employees: Employee[] }>().props.employees);
@@ -132,7 +139,7 @@ export default function DataKaryawan() {
     const deleteEmployee = (id: number) => setEmployees((prev) => prev.filter((employee) => employee.id !== id));
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Data Karyawan" />
             <div className="w-full p-4">
                 <div className="flex items-center py-4">
@@ -142,12 +149,16 @@ export default function DataKaryawan() {
                         onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
                         className="max-w-sm"
                     />
-                    <button onClick={() => setIsCreateModalOpen(true)} className="ml-auto rounded bg-blue-600 px-4 py-2 text-white">
+                    <Button onClick={() => setIsCreateModalOpen(true)} className="mx-2" variant="secondary">
+                        <Plus />
+                        Tambah
+                    </Button>
+                    {/* <button onClick={() => setIsCreateModalOpen(true)} className="ml-auto rounded bg-blue-600 px-4 py-2 text-white">
                         Tambah Karyawan
-                    </button>
+                    </button> */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="ml-2">
+                            <Button variant="outline" className="ml-auto">
                                 Columns <ChevronDown />
                             </Button>
                         </DropdownMenuTrigger>

@@ -12,14 +12,9 @@ class EmployeeController extends Controller
     {
         $employees = Employee::all();
 
-        return Inertia::render('data-karyawan', [
+        return Inertia::render('EmployeeDataPage', [
             'employees' => $employees,
         ]);
-    }
-
-    public function create()
-    {
-        // 
     }
 
     public function store(Request $request)
