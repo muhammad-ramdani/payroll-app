@@ -23,6 +23,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('data-karyawan', [EmployeeController::class, 'index']);
         Route::post('data-karyawan', [EmployeeController::class, 'store']);
         Route::put('data-karyawan/{employee}', [EmployeeController::class, 'update']);
+        Route::get('data-karyawan/{employee}', [EmployeeController::class, 'show']);
         Route::delete('data-karyawan/{employee}', [EmployeeController::class, 'destroy']);
     });
 });

@@ -63,6 +63,11 @@ class EmployeeController extends Controller
         return response()->json($employee);
     }
 
+    public function show(Employee $employee)
+    {
+        return response()->json($employee);
+    }
+
     public function destroy(Employee $employee)
     {
         $employee->delete();
