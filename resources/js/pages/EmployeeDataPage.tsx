@@ -153,9 +153,6 @@ export default function DataKaryawan() {
                         <Plus />
                         Tambah
                     </Button>
-                    {/* <button onClick={() => setIsCreateModalOpen(true)} className="ml-auto rounded bg-blue-600 px-4 py-2 text-white">
-                        Tambah Karyawan
-                    </button> */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="ml-auto">
@@ -199,7 +196,9 @@ export default function DataKaryawan() {
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow key={row.id}>
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                            <TableCell key={cell.id} className="capitalize">
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
                                         ))}
                                     </TableRow>
                                 ))

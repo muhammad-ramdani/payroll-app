@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('account_name')->nullable(); // Nama pemilik rekening
             $table->unsignedMediumInteger('basic_salary'); // Gaji pokok
             $table->unsignedTinyInteger('paid_holidays'); // Jumlah hari libur yang dibayar
-            $table->unsignedMediumInteger('daily_allowance'); // Uang lebur harian
+            $table->unsignedMediumInteger('daily_overtime_pay'); // Uang lebur harian
             // kolom potongan BPJS
             $table->unsignedTinyInteger('bpjs_health'); // Potongan BPJS Kesehatan 1%
             $table->unsignedTinyInteger('bpjs_employment'); // Potongan BPJS Ketenagakerjaan 3%

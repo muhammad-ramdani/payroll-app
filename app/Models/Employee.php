@@ -20,7 +20,7 @@ class Employee extends Model
         'account_name',
         'basic_salary',
         'paid_holidays',
-        'daily_allowance',
+        'daily_overtime_pay',
         'bpjs_health',
         'bpjs_employment',
         'income_tax',

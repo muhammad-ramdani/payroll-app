@@ -21,7 +21,7 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:25',
             'address' => 'nullable|string|max:255',
             'hire_date' => 'required|date',
             'bank_name' => 'nullable|string|max:255',
@@ -29,7 +29,7 @@ class EmployeeController extends Controller
             'account_name' => 'nullable|string|max:255',
             'basic_salary' => 'required|numeric',
             'paid_holidays' => 'required|integer|min:0',
-            'daily_allowance' => 'required|numeric|min:0',
+            'daily_overtime_pay' => 'required|numeric|min:0',
             'bpjs_health' => 'required|integer|min:0|max:100',
             'bpjs_employment' => 'required|integer|min:0|max:100',
             'income_tax' => 'required|integer|min:0|max:100',
@@ -44,9 +44,23 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:25',
+            'address' => 'nullable|string|max:255',
+            'hire_date' => 'required|date',
+            'bank_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:255',
+            'account_name' => 'nullable|string|max:255',
+            'basic_salary' => 'required|numeric|min:0',
+            'paid_holidays' => 'required|integer|min:0',
+            'daily_overtime_pay' => 'required|numeric|min:0',
+            'bpjs_health' => 'required|integer|min:0|max:100',
+            'bpjs_employment' => 'required|integer|min:0|max:100',
+            'income_tax' => 'required|integer|min:0|max:100',
         ]);
 
         $employee->update($validated);
+
+        return response()->json($employee);
     }
 
     public function destroy(Employee $employee)

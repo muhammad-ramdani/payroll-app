@@ -53,7 +53,7 @@ export interface Employee {
     account_name: string;
     basic_salary: number;
     paid_holidays: number;
-    daily_allowance: number;
+    daily_overtime_pay: number;
     bpjs_health: number;
     bpjs_employment: number;
     income_tax: number;

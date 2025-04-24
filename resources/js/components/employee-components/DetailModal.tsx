@@ -24,7 +24,7 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                         <TableRowNonBorder>
                             <TableCell>Nama</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{employee.name}</TableCell>
+                            <TableCell className="capitalize">{employee.name}</TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
@@ -44,7 +44,7 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                         <TableRowNonBorder>
                             <TableCell>Alamat</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{employee.address}</TableCell>
+                            <TableCell className="capitalize">{employee.address}</TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>
                         <TableRowNonBorder>
@@ -66,7 +66,9 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                             <TableCell>
                                 <div className="mb-2">{employee.account_number}</div>
                                 <span className="text-sm tracking-wide text-neutral-500 dark:text-neutral-400">
-                                    {employee.bank_name} - {employee.account_name}
+                                    <span className="uppercase">{employee.bank_name}</span>
+                                    <span> - </span>
+                                    <span className="capitalize">{employee.account_name}</span>
                                 </span>
                             </TableCell>
                             <TableCell>
@@ -101,7 +103,7 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                                     style: 'currency',
                                     currency: 'IDR',
                                     maximumFractionDigits: 0,
-                                }).format(employee.daily_allowance)}
+                                }).format(employee.daily_overtime_pay)}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRowNonBorder>

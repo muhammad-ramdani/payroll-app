@@ -21,7 +21,7 @@ class EmployeeFactory extends Factory
             'account_name' => $name,
             'basic_salary' => $this->faker->randomElement([4, 5, 6, 7]) * 10000 + $this->faker->randomElement([0, 5000, 10000]),
             'paid_holidays' => 2,
-            'daily_allowance' => $this->faker->randomElement([1, 2]) * 10000 + $this->faker->randomElement([0, 5000, 10000]),
+            'daily_overtime_pay' => $this->faker->randomElement([1, 2]) * 10000 + $this->faker->randomElement([0, 5000, 10000]),
             'bpjs_health' => 1,
             'bpjs_employment' => 3,
             'income_tax' => 0,
