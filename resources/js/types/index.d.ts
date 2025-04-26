@@ -59,6 +59,15 @@ export interface Employee {
     income_tax: number;
 }
 
+export interface EmployeeAttendance {
+    id: number;
+    employee: Employee;
+    date: string;
+    clock_in: string | null;
+    clock_out: string | null;
+    status: 'not_started' | 'working' | 'finished' | 'leave';
+}
+
 export interface ModalProps {
     open: boolean;
     onClose: () => void;

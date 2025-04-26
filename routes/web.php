@@ -1,14 +1,14 @@
 <?php
 
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('absensi', function () {
-        return Inertia::render('EmployeeAttendancePage');
-    })->name('absensi');
+    Route::get('absensi', [AttendanceController::class, 'index'])->name('absensi');
+    Route::patch('absensi/{attendance}', [AttendanceController::class, 'update'])->name('absensi.update');
 
     Route::get('laporan-absensi', function () {
         return Inertia::render('AttendanceReportPage');

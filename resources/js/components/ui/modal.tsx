@@ -14,7 +14,7 @@ export default function UIDialog({ open, onClose, title, children }: ModalProps)
         <Modal open={open} onClose={() => {}} className="relative z-10">
             <ModalBackdrop
                 transition
-                className="fixed inset-0 dark:bg-black/20 backdrop-blur-md transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                className="fixed inset-0 bg-black/5 dark:bg-white/7 backdrop-blur-md transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
             />
 
             <div className="fixed inset-0 overflow-y-auto scrollbar scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-800 scrollbar-track-transparent">

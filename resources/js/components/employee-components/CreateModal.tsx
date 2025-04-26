@@ -27,7 +27,7 @@ export default function CreateModal({ open, onClose, addEmployee }: CreateModalP
     const onSubmit = async (data: FormValues) => {
         try {
             const payload = { ...data, hire_date: data.hire_date };
-            const res = await fetch('/data-karyawan', {
+            const res = await fetch('data-karyawan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export default function CreateModal({ open, onClose, addEmployee }: CreateModalP
                 form.reset();
                 onClose();
             } else {
-                alert('Gagal menambahkan data.');
+                alert('Gagal menambahkan data. Silakan reload halaman.');
             }
         } catch {
             alert('Terjadi kesalahan saat mengirim data.');

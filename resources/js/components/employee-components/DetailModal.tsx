@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import Modal from '@/components/ui/modal';
-import { Table, TableBody, TableCell, TableRowNonBorder } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { EmployeeModalProps } from '@/types';
 import { Check, Copy } from 'lucide-react';
 import React from 'react';
@@ -21,13 +21,13 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
             <div className="relative">
                 <Table>
                     <TableBody>
-                        <TableRowNonBorder>
+                        <TableRow>
                             <TableCell>Nama</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell className="capitalize">{employee.name}</TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Nomer HP</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>{employee.phone}</TableCell>
@@ -40,14 +40,14 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                                     {localCopiedField === 'phone' ? <Check /> : <Copy />}
                                 </Button>
                             </TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Alamat</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell className="capitalize">{employee.address}</TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Tanggal Bergabung</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>
@@ -59,8 +59,8 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                                 }).format(new Date(employee.hire_date))}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Nomor Rekening</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>
@@ -76,8 +76,8 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                                     {localCopiedField === 'account_number' ? <Check /> : <Copy />}
                                 </Button>
                             </TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Gaji Pokok Harian</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>
@@ -88,14 +88,14 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                                 }).format(employee.basic_salary)}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Jatah Hari Libur (Bonus)</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>{employee.paid_holidays} hari</TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Uang Lembur Harian</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>
@@ -106,25 +106,25 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                                 }).format(employee.daily_overtime_pay)}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Potongan BPJS Kesehatan</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>{employee.bpjs_health}%</TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Potongan BPJS Ketenagakerjaan</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>{employee.bpjs_employment}%</TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
-                        <TableRowNonBorder>
+                        </TableRow>
+                        <TableRow>
                             <TableCell>Potongan PPh</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>{employee.income_tax}%</TableCell>
                             <TableCell className="h-13"></TableCell>
-                        </TableRowNonBorder>
+                        </TableRow>
                     </TableBody>
                 </Table>
             </div>
