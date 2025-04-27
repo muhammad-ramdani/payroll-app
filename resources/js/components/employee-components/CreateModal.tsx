@@ -1,378 +1,251 @@
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { CreateModalProps } from '@/types';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { addDays, format, startOfDay } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { FormEventHandler } from 'react';
 import Modal from '../ui/modal';
-import {
-    accountPattern,
-    createKeyDownHandler,
-    digitPattern,
-    formatRupiah,
-    formSchema,
-    FormValues,
-    letterPattern,
-    phonePattern,
-} from './employeeFormHelpers';
+import { accountPattern, createKeyDownHandler, digitPattern, formatRupiah, letterPattern, phonePattern, useFormEmployee } from './employeeFormUtils';
 
-export default function CreateModal({ open, onClose, addEmployee }: CreateModalProps) {
-    const form = useForm<FormValues>({ resolver: zodResolver(formSchema) });
+export default function CreateModal({ open, onClose, createEmployee }: CreateModalProps) {
+    const { data, setData, post, errors, processing } = useFormEmployee();
 
-    const onSubmit = async (data: FormValues) => {
-        try {
-            const payload = { ...data, hire_date: data.hire_date };
-            const res = await fetch('data-karyawan', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: JSON.stringify(payload),
-            });
-            if (res.ok) {
-                addEmployee(await res.json());
-                form.reset();
+    const handleSubmit: FormEventHandler = (e) => {
+        e.preventDefault();
+
+        post('/data-karyawan', {
+            preserveScroll: true,
+            onSuccess: () => {
+                createEmployee(data);
                 onClose();
-            } else {
-                alert('Gagal menambahkan data. Silakan reload halaman.');
-            }
-        } catch {
-            alert('Terjadi kesalahan saat mengirim data.');
-        }
+            },
+        });
     };
 
     if (!open) return null;
 
     return (
         <Modal open={open} onClose={onClose} title="Tambah Data Karyawan">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    {/* Nama */}
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Nama<span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        className="capitalize"
-                                        placeholder="Nama"
-                                        maxLength={250}
-                                        {...field}
-                                        onKeyDown={createKeyDownHandler(letterPattern)}
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Nama */}
+                <div className="grid gap-2">
+                    <Label>
+                        Nama<span className="text-red-600">*</span>
+                    </Label>
+                    <Input
+                        className="capitalize"
+                        placeholder="Nama"
+                        minLength={3}
+                        maxLength={250}
+                        value={data.name}
+                        onChange={(e) => setData('name', e.target.value)}
+                        onKeyDown={createKeyDownHandler(letterPattern)}
                     />
+                    <InputError message={errors.name} />
+                </div>
 
-                    {/* Nomor Handphone */}
-                    <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Nomor Handphone</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="0812-3456-7890"
-                                        maxLength={25}
-                                        {...field}
-                                        onKeyDown={createKeyDownHandler(phonePattern)}
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                {/* Nomor Handphone */}
+                <div className="grid gap-2">
+                    <Label>
+                        Nomor Handphone<span className="text-red-600">*</span>
+                    </Label>
+                    <Input
+                        placeholder="Contoh: 0812-3456-7890"
+                        maxLength={25}
+                        value={data.phone}
+                        onChange={(e) => setData('phone', e.target.value)}
+                        onKeyDown={createKeyDownHandler(phonePattern)}
                     />
+                    <InputError message={errors.phone} />
+                </div>
 
-                    {/* Alamat */}
-                    <FormField
-                        control={form.control}
-                        name="address"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Alamat</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        className="capitalize"
-                                        placeholder="Maksimal 250 Karakter"
-                                        maxLength={250}
-                                        {...field}
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                {/* Alamat */}
+                <div className="grid gap-2">
+                    <Label>Alamat</Label>
+                    <Input className="capitalize" placeholder="Maksimal 250 Karakter" maxLength={250} value={data.address} onChange={(e) => setData('address', e.target.value)} />
+                    <InputError message={errors.address} />
+                </div>
 
-                    {/* Tanggal Mulai Kerja */}
-                    <FormField
-                        control={form.control}
-                        name="hire_date"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>
-                                    Tanggal Mulai Kerja<span className="text-red-600">*</span>
-                                </FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                variant="outline"
-                                                className={cn('pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
-                                            >
-                                                {field.value ? format(field.value, 'PPP') : 'Pilih Tanggal'}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={field.onChange}
-                                            disabled={(date) => date > startOfDay(addDays(new Date(), 2)) || date < new Date('2016-01-01')}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Bank & Account */}
-                    <div className="grid gap-4 sm:grid-cols-3">
-                        <FormField
-                            control={form.control}
-                            name="bank_name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nama Bank</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="uppercase"
-                                            placeholder="BANK INDONESIA"
-                                            maxLength={50}
-                                            {...field}
-                                            onKeyDown={createKeyDownHandler(/^[a-zA-Z ]$/)}
-                                            value={field.value ?? ''}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="sm:col-span-2">
-                            <FormField
-                                control={form.control}
-                                name="account_number"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nomor Rekening</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="XXXX-XXXX-XXXX-XXXX"
-                                                maxLength={100}
-                                                {...field}
-                                                onKeyDown={createKeyDownHandler(accountPattern)}
-                                                value={field.value ?? ''}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
+                {/* Tanggal Mulai Kerja */}
+                <div className="grid gap-2">
+                    <Label>
+                        Tanggal Mulai Kerja<span className="text-red-600">*</span>
+                    </Label>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn('pl-3 text-left font-normal', !data.hire_date && 'text-muted-foreground')}>
+                                {data.hire_date ? format(data.hire_date, 'PPP') : 'Pilih Tanggal'}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={data.hire_date ?? undefined}
+                                onSelect={(date) => {
+                                    if (date) setData('hire_date', date);
+                                }}
+                                disabled={(date) => date > startOfDay(addDays(new Date(), 2)) || date < new Date('2016-01-01')}
+                                initialFocus
                             />
-                        </div>
+                        </PopoverContent>
+                    </Popover>
+                    <InputError message={errors.hire_date} />
+                </div>
+
+                {/* Bank & Rekening */}
+                <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="grid gap-2">
+                        <Label>Nama Bank</Label>
+                        <Input
+                            className="uppercase"
+                            minLength={2}
+                            maxLength={50}
+                            placeholder="Contoh: BCA"
+                            value={data.bank_name}
+                            onChange={(e) => setData('bank_name', e.target.value)}
+                            onKeyDown={createKeyDownHandler(/^[a-zA-Z ]$/)}
+                        />
+                        <InputError message={errors.bank_name} />
                     </div>
 
-                    {/* Nama Pemilik Rekening */}
-                    <FormField
-                        control={form.control}
-                        name="account_name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Nama Pemilik Rekening</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        className="capitalize"
-                                        placeholder="Nama"
-                                        maxLength={250}
-                                        {...field}
-                                        onKeyDown={createKeyDownHandler(letterPattern)}
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Gaji Pokok Harian */}
-                    <FormField
-                        control={form.control}
-                        name="basic_salary"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Gaji Pokok Harian (Rp)<span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        value={formatRupiah(field.value ?? '')}
-                                        maxLength={8}
-                                        onChange={(e) => {
-                                            const numericValue = parseInt(e.target.value.replace(/\D/g, '')) || 0;
-                                            field.onChange(numericValue);
-                                        }}
-                                        onKeyDown={createKeyDownHandler(digitPattern)}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Jatah Hari Libur */}
-                    <FormField
-                        control={form.control}
-                        name="paid_holidays"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Jatah Hari Libur<span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="0"
-                                        maxLength={2}
-                                        {...field}
-                                        onKeyDown={createKeyDownHandler(digitPattern)}
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Uang Lembur Harian */}
-                    <FormField
-                        control={form.control}
-                        name="daily_overtime_pay"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Uang Lembur Harian (Rp)<span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        value={formatRupiah(field.value ?? '')}
-                                        maxLength={8}
-                                        onChange={(e) => {
-                                            const numericValue = parseInt(e.target.value.replace(/\D/g, '')) || 0;
-                                            field.onChange(numericValue);
-                                        }}
-                                        onKeyDown={createKeyDownHandler(digitPattern)}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Potongan BPJS Kesehatan */}
-                    <FormField
-                        control={form.control}
-                        name="bpjs_health"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Potongan BPJS Kesehatan (%)<span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="0"
-                                        maxLength={2}
-                                        {...field}
-                                        onKeyDown={createKeyDownHandler(digitPattern)}
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Potongan BPJS Ketenagakerjaan */}
-                    <FormField
-                        control={form.control}
-                        name="bpjs_employment"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Potongan BPJS Ketenagakerjaan (%)<span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="0"
-                                        maxLength={2}
-                                        {...field}
-                                        onKeyDown={createKeyDownHandler(digitPattern)}
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Potongan PPh */}
-                    <FormField
-                        control={form.control}
-                        name="income_tax"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Potongan PPh (%)<span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="0"
-                                        maxLength={2}
-                                        {...field}
-                                        onKeyDown={createKeyDownHandler(digitPattern)}
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Actions */}
-                    <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={onClose}>
-                            Batal
-                        </Button>
-                        <Button type="submit">Simpan</Button>
+                    <div className="grid gap-2 sm:col-span-2">
+                        <Label>Nomor Rekening</Label>
+                        <Input
+                            placeholder="Contoh: 1234-5678-9012"
+                            maxLength={100}
+                            value={data.account_number}
+                            onChange={(e) => setData('account_number', e.target.value)}
+                            onKeyDown={createKeyDownHandler(accountPattern)}
+                        />
+                        <InputError message={errors.account_number} />
                     </div>
-                </form>
-            </Form>
+                </div>
+
+                {/* Nama Pemilik Rekening */}
+                <div className="grid gap-2">
+                    <Label>Nama Pemilik Rekening</Label>
+                    <Input
+                        className="capitalize"
+                        placeholder="Nama"
+                        minLength={3}
+                        maxLength={250}
+                        value={data.account_name}
+                        onChange={(e) => setData('account_name', e.target.value)}
+                        onKeyDown={createKeyDownHandler(letterPattern)}
+                    />
+                    <InputError message={errors.account_name} />
+                </div>
+
+                {/* Gaji Pokok Harian */}
+                <div className="grid gap-2">
+                    <Label>
+                        Gaji Pokok Harian (Rp)<span className="text-red-600">*</span>
+                    </Label>
+                    <Input
+                        value={formatRupiah(data.basic_salary)}
+                        maxLength={8}
+                        onChange={(e) => {
+                            const numericValue = parseInt(e.target.value.replace(/\D/g, '')) || 0;
+                            setData('basic_salary', numericValue);
+                        }}
+                        onKeyDown={createKeyDownHandler(digitPattern)}
+                    />
+                    <InputError message={errors.basic_salary} />
+                </div>
+
+                {/* Jatah Hari Libur */}
+                <div className="grid gap-2">
+                    <Label>
+                        Jatah Hari Libur<span className="text-red-600">*</span>
+                    </Label>
+                    <Input
+                        placeholder="0"
+                        maxLength={2}
+                        value={data.paid_holidays}
+                        onChange={(e) => setData('paid_holidays', e.target.value)}
+                        onKeyDown={createKeyDownHandler(digitPattern)}
+                    />
+                    <InputError message={errors.paid_holidays} />
+                </div>
+
+                {/* Uang Lembur Harian */}
+                <div className="grid gap-2">
+                    <Label>
+                        Uang Lembur Harian (Rp)<span className="text-red-600">*</span>
+                    </Label>
+                    <Input
+                        value={formatRupiah(data.daily_overtime_pay)}
+                        maxLength={8}
+                        onChange={(e) => {
+                            const numericValue = parseInt(e.target.value.replace(/\D/g, '')) || 0;
+                            setData('daily_overtime_pay', numericValue);
+                        }}
+                        onKeyDown={createKeyDownHandler(digitPattern)}
+                    />
+                    <InputError message={errors.daily_overtime_pay} />
+                </div>
+
+                {/* BPJS dan PPh */}
+                <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="grid gap-2">
+                        <Label>
+                            BPJS Kesehatan (%)<span className="text-red-600">*</span>
+                        </Label>
+                        <Input
+                            placeholder="0"
+                            maxLength={2}
+                            value={data.bpjs_health}
+                            onChange={(e) => setData('bpjs_health', e.target.value)}
+                            onKeyDown={createKeyDownHandler(digitPattern)}
+                        />
+                        <InputError message={errors.bpjs_health} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label>
+                            BPJS Ketenagakerjaan (%)<span className="text-red-600">*</span>
+                        </Label>
+                        <Input
+                            placeholder="0"
+                            maxLength={2}
+                            value={data.bpjs_employment}
+                            onChange={(e) => setData('bpjs_employment', e.target.value)}
+                            onKeyDown={createKeyDownHandler(digitPattern)}
+                        />
+                        <InputError message={errors.bpjs_employment} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label>
+                            PPh (%)<span className="text-red-600">*</span>
+                        </Label>
+                        <Input
+                            placeholder="0"
+                            maxLength={2}
+                            value={data.income_tax}
+                            onChange={(e) => setData('income_tax', e.target.value)}
+                            onKeyDown={createKeyDownHandler(digitPattern)}
+                        />
+                        <InputError message={errors.income_tax} />
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="mt-6 flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={onClose}>
+                        Batal
+                    </Button>
+                    <Button type="submit" disabled={processing}>
+                        {processing ? 'Menyimpan...' : 'Simpan'}
+                    </Button>
+                </div>
+            </form>
         </Modal>
     );
 }

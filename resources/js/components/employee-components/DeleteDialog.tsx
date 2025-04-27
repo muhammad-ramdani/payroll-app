@@ -9,27 +9,20 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { DeleteDialogProps } from '@/types';
+import { router } from '@inertiajs/react';
 
-export default function DeleteDialog({ open, onClose, onDelete, employee }: DeleteDialogProps) {
-    const handleDelete = async () => {
-        if (employee) {
-            try {
-                const response = await fetch(`/data-karyawan/${employee.id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    },
-                });
-                if (response.ok) {
-                    onDelete(employee.id); // Panggil fungsi onDelete untuk memperbarui state
-                    onClose();
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat menghapus data.');
-            }
-        }
+export default function DeleteDialog({ open, onClose, deleteEmployee, employee }: DeleteDialogProps) {
+    const handleDelete = () => {
+        if (!employee) return;
+
+        router.delete(route('data-karyawan.destroy', employee.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                deleteEmployee(employee.id!);
+                onClose();
+            },
+            onError: () => router.reload(),
+        });
     };
 
     return (
@@ -37,10 +30,12 @@ export default function DeleteDialog({ open, onClose, onDelete, employee }: Dele
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
-                    <AlertDialogDescription>Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</AlertDialogDescription>
+                    <AlertDialogDescription>
+                        Apakah Anda yakin ingin menghapus data <span className="font-bold text-black dark:text-white">{employee?.name}</span>? Tindakan ini tidak dapat dibatalkan.
+                    </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>Batal</AlertDialogCancel>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
                     <AlertDialogAction onClick={handleDelete}>Hapus</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

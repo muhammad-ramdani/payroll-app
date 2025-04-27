@@ -47,16 +47,17 @@ export interface Employee {
     name: string;
     phone: string;
     address: string;
-    hire_date: Date;
+    hire_date: Date | null;
     bank_name: string;
     account_number: string;
     account_name: string;
     basic_salary: number;
-    paid_holidays: number;
+    paid_holidays: string;
     daily_overtime_pay: number;
-    bpjs_health: number;
-    bpjs_employment: number;
-    income_tax: number;
+    bpjs_health: string;
+    bpjs_employment: string;
+    income_tax: string;
+    [key: string]: string | number | Date | Blob | File | null | undefined;
 }
 
 export interface EmployeeAttendance {
@@ -78,13 +79,13 @@ export interface EmployeeModalProps extends ModalProps {
 }
 
 export interface CreateModalProps extends ModalProps {
-    addEmployee: (employee: Employee) => void;
+    createEmployee: (employee: Employee) => void;
 }
 
 export interface EditModalProps extends EmployeeModalProps {
-    onUpdate: (employee: Employee) => void;
+    updateEmployee: (employee: Employee) => void;
 }
 
 export interface DeleteDialogProps extends EmployeeModalProps {
-    onDelete: (id: number) => void;
+    deleteEmployee: (id: number) => void;
 }

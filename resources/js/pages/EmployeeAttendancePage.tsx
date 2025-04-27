@@ -16,7 +16,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import axios from 'axios';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, ClockArrowDown, ClockArrowUp } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const pageBreadcrumbs: BreadcrumbItem[] = [{ title: 'Absensi Karyawan', href: '/absensi' }];
@@ -114,7 +114,7 @@ export default function EmployeeAttendancePage() {
             },
             {
                 id: 'clock_in',
-                header: 'Clock In',
+                header: 'Jam Masuk',
                 cell: ({ row }) => {
                     const attendance = row.original;
                     if (attendance.status === 'leave') return '-';
@@ -130,14 +130,14 @@ export default function EmployeeAttendancePage() {
                                 })
                             }
                         >
-                            Clock In
+                            <ClockArrowDown />
                         </Button>
                     );
                 },
             },
             {
                 id: 'clock_out',
-                header: 'Clock Out',
+                header: 'Jam Pulang',
                 cell: ({ row }) => {
                     const attendance = row.original;
                     if (attendance.status === 'leave') return '-';
@@ -154,7 +154,7 @@ export default function EmployeeAttendancePage() {
                                 })
                             }
                         >
-                            Clock Out
+                            <ClockArrowUp />
                         </Button>
                     );
                 },

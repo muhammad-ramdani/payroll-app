@@ -17,25 +17,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Employee } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import {
-    ColumnFiltersState,
-    SortingState,
-    VisibilityState,
-    flexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useReactTable,
-} from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
+import { ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Pencil, Plus, SquareArrowOutUpRight, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Data Karyawan',
-        href: '/data-karyawan',
-    },
-];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Data Karyawan', href: '/data-karyawan' }];
 
 export default function DataKaryawan() {
     const [employees, setEmployees] = React.useState<Employee[]>(usePage<{ employees: Employee[] }>().props.employees);
@@ -92,6 +78,7 @@ export default function DataKaryawan() {
                                         setIsEditDialogOpen(true);
                                     }}
                                 >
+                                    <Pencil />
                                     Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
@@ -100,6 +87,7 @@ export default function DataKaryawan() {
                                         setIsDetailDialogOpen(true);
                                     }}
                                 >
+                                    <SquareArrowOutUpRight />
                                     Lihat Detail
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
@@ -110,6 +98,7 @@ export default function DataKaryawan() {
                                         setIsDialogOpen(true);
                                     }}
                                 >
+                                    <Trash2 className="text-red-600" />
                                     Hapus
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -131,8 +120,7 @@ export default function DataKaryawan() {
         },
     });
 
-    const updateEmployee = (updatedEmployee: Employee) =>
-        setEmployees((prev) => prev.map((employee) => (employee.id === updatedEmployee.id ? updatedEmployee : employee)));
+    const updateEmployee = (updatedEmployee: Employee) => setEmployees((prev) => prev.map((employee) => (employee.id === updatedEmployee.id ? updatedEmployee : employee)));
 
     const createEmployee = (newEmployee: Employee) => setEmployees((prev) => [...prev, newEmployee]);
 
@@ -144,15 +132,17 @@ export default function DataKaryawan() {
             <div className="w-full p-4">
                 <div className="flex items-center py-4">
                     <Input
-                        placeholder="Cari karyawan..."
+                        placeholder="Cari nama karyawan..."
                         value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
                         onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
                         className="max-w-sm"
                     />
+
                     <Button onClick={() => setIsCreateModalOpen(true)} className="mx-2" variant="secondary">
                         <Plus />
                         Tambah
                     </Button>
+
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="ml-auto">
@@ -178,15 +168,14 @@ export default function DataKaryawan() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
+                                        <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                                     ))}
                                 </TableRow>
                             ))}
@@ -214,10 +203,10 @@ export default function DataKaryawan() {
                 </div>
             </div>
 
-            <CreateModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} addEmployee={createEmployee} />
+            <CreateModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} createEmployee={createEmployee} />
             <DetailModal open={isDetailDialogOpen} onClose={() => setIsDetailDialogOpen(false)} employee={selectedEmployee} />
-            <EditModal open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} employee={selectedEmployee} onUpdate={updateEmployee} />
-            <DeleteDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} onDelete={deleteEmployee} employee={selectedEmployee} />
+            <EditModal open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} employee={selectedEmployee} updateEmployee={updateEmployee} />
+            <DeleteDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} employee={selectedEmployee} deleteEmployee={deleteEmployee} />
         </AppLayout>
     );
 }

@@ -20,11 +20,11 @@ Route::middleware(['auth'])->group(function () {
         })->name('dashboard');
 
         // ini route untuk data karyawan
-        Route::get('data-karyawan', [EmployeeController::class, 'index']);
-        Route::post('data-karyawan', [EmployeeController::class, 'store']);
-        Route::put('data-karyawan/{employee}', [EmployeeController::class, 'update']);
-        Route::get('data-karyawan/{employee}', [EmployeeController::class, 'show']);
-        Route::delete('data-karyawan/{employee}', [EmployeeController::class, 'destroy']);
+        Route::get('data-karyawan', [EmployeeController::class, 'index'])->name('data-karyawan.index');
+        Route::post('data-karyawan', [EmployeeController::class, 'store'])->name('data-karyawan.store');
+        Route::patch('data-karyawan/{employee}', [EmployeeController::class, 'update'])->name('data-karyawan.update');
+        Route::get('data-karyawan/{employee}', [EmployeeController::class, 'show'])->name('data-karyawan.show');
+        Route::delete('data-karyawan/{employee}', [EmployeeController::class, 'destroy'])->name('data-karyawan.destroy');
     });
 });
 

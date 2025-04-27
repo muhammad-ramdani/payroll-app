@@ -20,16 +20,16 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:25',
+            'name' => 'required|string|min:3|max:255',
+            'phone' => 'required|string|max:25',
             'address' => 'nullable|string|max:255',
             'hire_date' => 'required|date',
             'bank_name' => 'nullable|string|max:255',
             'account_number' => 'nullable|string|max:255',
             'account_name' => 'nullable|string|max:255',
-            'basic_salary' => 'required|numeric',
-            'paid_holidays' => 'required|integer|min:0',
-            'daily_overtime_pay' => 'required|numeric|min:0',
+            'basic_salary' => 'required|numeric|min:1',
+            'paid_holidays' => 'required|integer|min:0|max:31',
+            'daily_overtime_pay' => 'required|numeric|min:1',
             'bpjs_health' => 'required|integer|min:0|max:100',
             'bpjs_employment' => 'required|integer|min:0|max:100',
             'income_tax' => 'required|integer|min:0|max:100',
@@ -37,22 +37,26 @@ class EmployeeController extends Controller
 
         $employee = Employee::create($validated);
 
-        return response()->json($employee);
+        if ($request->wantsJson()) {
+            return response()->json($employee);
+        }
+
+        return redirect()->route('data-karyawan.index');
     }
 
     public function update(Request $request, Employee $employee)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:25',
+            'name' => 'required|string|min:3|max:255',
+            'phone' => 'required|string|max:25',
             'address' => 'nullable|string|max:255',
             'hire_date' => 'required|date',
             'bank_name' => 'nullable|string|max:255',
             'account_number' => 'nullable|string|max:255',
             'account_name' => 'nullable|string|max:255',
-            'basic_salary' => 'required|numeric|min:0',
-            'paid_holidays' => 'required|integer|min:0',
-            'daily_overtime_pay' => 'required|numeric|min:0',
+            'basic_salary' => 'required|numeric|min:1',
+            'paid_holidays' => 'required|integer|min:0|max:31',
+            'daily_overtime_pay' => 'required|numeric|min:1',
             'bpjs_health' => 'required|integer|min:0|max:100',
             'bpjs_employment' => 'required|integer|min:0|max:100',
             'income_tax' => 'required|integer|min:0|max:100',
@@ -60,7 +64,11 @@ class EmployeeController extends Controller
 
         $employee->update($validated);
 
-        return response()->json($employee);
+        if ($request->wantsJson()) {
+            return response()->json($employee);
+        }
+
+        return redirect()->route('data-karyawan.index');
     }
 
     public function show(Employee $employee)

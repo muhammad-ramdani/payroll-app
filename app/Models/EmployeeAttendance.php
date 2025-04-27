@@ -14,6 +14,6 @@ class EmployeeAttendance extends Model
     // Relasi ke Employee
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class)->withTrashed();
     }
 }

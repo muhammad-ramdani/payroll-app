@@ -76,7 +76,7 @@ test('tamu diarahkan ke halaman login saat mengedit data karyawan', function () 
     $employee = Employee::factory()->create();
     $payload  = Employee::factory()->raw();
 
-    $this->put("/data-karyawan/{$employee->id}", $payload)->assertRedirect('/');
+    $this->patch("/data-karyawan/{$employee->id}", $payload)->assertRedirect('/');
 });
 
 test('admin dapat mengedit data karyawan dengan data valid', function () {
@@ -86,7 +86,7 @@ test('admin dapat mengedit data karyawan dengan data valid', function () {
     $employee = Employee::factory()->create();
     $payload  = Employee::factory()->raw();
 
-    $response = $this->putJson("/data-karyawan/{$employee->id}", $payload);
+    $response = $this->patchJson("/data-karyawan/{$employee->id}", $payload);
     $response->assertStatus(200)->assertJsonFragment([
         'id'    => $employee->id,
         'name'  => $payload['name'],
@@ -106,7 +106,7 @@ test('admin gagal mengedit data karyawan jika data tidak lengkap atau salah', fu
 
     $employee = Employee::factory()->create();
     $payload  = ['name' => '', 'hire_date' => null];
-    $response = $this->putJson("/data-karyawan/{$employee->id}", $payload);
+    $response = $this->patchJson("/data-karyawan/{$employee->id}", $payload);
 
     $response->assertStatus(422)->assertJsonValidationErrors(['name', 'hire_date']);
 });
@@ -117,7 +117,7 @@ test('user dengan role karyawan tidak dapat mengedit data karyawan', function ()
 
     $employee = Employee::factory()->create();
     $payload  = Employee::factory()->raw();
-    $this->put("/data-karyawan/{$employee->id}", $payload)->assertRedirect('/absensi');
+    $this->patch("/data-karyawan/{$employee->id}", $payload)->assertRedirect('/absensi');
 });
 
 // Test untuk fitur Detail Data Karyawan

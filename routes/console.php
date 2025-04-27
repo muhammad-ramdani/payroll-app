@@ -25,7 +25,7 @@ Schedule::call(function () {
             ]
         );
     }
-})->dailyAt('00:01');
+})->dailyAt('01:32');
 // })->everyMinute();
 
 Schedule::call(function () {
