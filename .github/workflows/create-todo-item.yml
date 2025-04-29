@@ -1,31 +1,18 @@
-name: Auto Add Todo to Project
+name: Buat Todo Otomatis
 
 on:
-  workflow_dispatch: # agar bisa dijalankan manual
+  workflow_dispatch:
 
 permissions:
   issues: write
-  repository-projects: write
 
 jobs:
-  create-todo:
+  buat-issue:
     runs-on: ubuntu-latest
     steps:
-      - name: Create issue (Todo)
+      - name: Buat Todo issue
         uses: peter-evans/create-issue-from-file@v5
         with:
           title: "Kerjakan fitur absensi harian"
           content-filepath: .github/todo/absensi.md
           labels: todo
-
-  add-to-project:
-    needs: create-todo
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Add issue to project
-        uses: actions/add-to-project@v1
-        with:
-          project-url: https://github.com/users/muhammad-ramdani/projects/9
-          github-token: ${{ secrets.GITHUB_TOKEN }}
