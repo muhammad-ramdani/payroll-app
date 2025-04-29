@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(EmployeeSeeder::class);
         $this->call(EmployeeAttendanceSeeder::class);
+        $this->call(PayrollSeeder::class);
 
         User::factory()->create([
             'name' => 'Ramdani',

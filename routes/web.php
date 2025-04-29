@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\PayrollController;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,6 +19,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', function () {
             return Inertia::render('DashboardPage');
         })->name('dashboard');
+
+        // ini route untuk perhitungan penggajian
+        Route::get('perhitungan-penggajian', [PayrollController::class, 'index'])->name('perhitungan-penggajian.index');
+        Route::patch('perhitungan-penggajian/paid/{payroll}', [PayrollController::class, 'paid'])->name('perhitungan-penggajian.paid');
+        Route::patch('perhitungan-penggajian/calculate/{payroll}', [PayrollController::class, 'calculate'])->name('perhitungan-penggajian.calculate');
 
         // ini route untuk data karyawan
         Route::get('data-karyawan', [EmployeeController::class, 'index'])->name('data-karyawan.index');

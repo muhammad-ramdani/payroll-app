@@ -60,6 +60,28 @@ export interface Employee {
     [key: string]: string | number | Date | Blob | File | null | undefined;
 }
 
+export interface Payroll {
+    id: number;
+    employee: Employee;
+    period_month: string;
+    period_year: string;
+    total_attendance_days: string;
+    paid_holidays: string;
+    total_overtime_days: string;
+    basic_salary: string;
+    daily_overtime_pay: string;
+    total_basic_salary: string;
+    total_overtime_pay: string;
+    gross_salary: string;
+    bpjs_health_percent: string;
+    bpjs_employment_percent: string;
+    income_tax_percent: string;
+    total_deduction_percent: string;
+    total_deductions: string;
+    net_salary: string;
+    status: 'uncalculated' | 'paid' | 'unpaid';
+}
+
 export interface EmployeeAttendance {
     id: number;
     employee: Employee;
@@ -88,4 +110,8 @@ export interface EditModalProps extends EmployeeModalProps {
 
 export interface DeleteDialogProps extends EmployeeModalProps {
     deleteEmployee: (id: number) => void;
+}
+
+export interface PayrollModalProps extends ModalProps {
+    payroll: Payroll | null;
 }

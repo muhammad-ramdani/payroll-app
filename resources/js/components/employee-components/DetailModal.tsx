@@ -56,7 +56,7 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                                     day: 'numeric',
                                     month: 'long',
                                     year: 'numeric',
-                                }).format(new Date(employee.hire_date))}
+                                }).format(new Date(employee.hire_date!))}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRow>
@@ -64,7 +64,7 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                             <TableCell>Nomor Rekening</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>
-                                <div className="mb-2">{employee.account_number}</div>
+                                <div>{employee.account_number}</div>
                                 <span className="text-sm tracking-wide text-neutral-500 dark:text-neutral-400">
                                     <span className="uppercase">{employee.bank_name}</span>
                                     <span> - </span>

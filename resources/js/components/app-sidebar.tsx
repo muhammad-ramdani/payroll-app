@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, IdCard, ClipboardCheck, CalendarClock } from 'lucide-react';
+import { LayoutGrid, IdCard, ClipboardCheck, CalendarClock, DollarSign } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
@@ -25,6 +25,12 @@ export function AppSidebar() {
             title: 'Laporan Absensi',
             href: '/laporan-absensi',
             icon: CalendarClock,
+        },
+        {
+            title: 'Perhitungan Penggajian',
+            href: '/perhitungan-penggajian',
+            icon: DollarSign,
+            role: 'admin',
         },
         {
             title: 'Data Karyawan',
