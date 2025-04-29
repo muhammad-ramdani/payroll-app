@@ -4,12 +4,16 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   issues: write
 
 jobs:
   buat-issue:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Buat Todo issue
         uses: peter-evans/create-issue-from-file@v5
         with:
