@@ -9,13 +9,12 @@ class EmployeeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'               => $name = $this->faker->name(),
             'phone'              => $this->faker->phoneNumber(),
             'address'            => $this->faker->address(),
             'hire_date'          => $this->faker->dateTimeBetween('2016-01-01', 'now')->format('Y-m-d'),
             'bank_name'          => $this->faker->randomElement(['BNI', 'BRI', 'BCA', 'Mandiri', 'BSI']),
             'account_number'     => $this->faker->bankAccountNumber(),
-            'account_name'       => $name,
+            'account_name'       => $this->faker->name(),
             'basic_salary'       => $this->faker->randomElement([5, 6, 7]) * 10000 + $this->faker->randomElement([0, 5000, 10000]),
             'paid_holidays'      => 2,
             'daily_overtime_pay' => $this->faker->randomElement([1, 2]) * 10000 + $this->faker->randomElement([0, 5000, 10000]),

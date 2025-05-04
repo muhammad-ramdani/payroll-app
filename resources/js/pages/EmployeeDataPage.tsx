@@ -1,5 +1,6 @@
+// EmployeeDataPage.tsx
 import CreateModal from '@/components/employee-components/CreateModal';
-import DeleteDialog from '@/components/employee-components/DeleteDialog';
+import DeleteModal from '@/components/employee-components/DeleteModal';
 import DetailModal from '@/components/employee-components/DetailModal';
 import EditModal from '@/components/employee-components/EditModal';
 import { Button } from '@/components/ui/button';
@@ -17,28 +18,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Employee } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Pencil, Plus, SquareArrowOutUpRight, Trash2 } from 'lucide-react';
-import * as React from 'react';
+import { ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState } from '@tanstack/react-table';
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Data Karyawan', href: '/data-karyawan' }];
 
 export default function DataKaryawan() {
-    const [employees, setEmployees] = React.useState<Employee[]>(usePage<{ employees: Employee[] }>().props.employees);
-    const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
-    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-    const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
-    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [employees, setEmployees] = useState<Employee[]>(usePage<{ employees: Employee[] }>().props.employees);
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
     const table = useReactTable({
         data: employees,
         columns: [
             {
                 accessorKey: 'name',
+                accessorFn: (row) => row.user.name,
                 header: ({ column }) => (
                     <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
                         Nama
@@ -48,17 +50,14 @@ export default function DataKaryawan() {
                 cell: ({ row }) => <div>{row.getValue('name')}</div>,
             },
             {
-                accessorKey: 'phone',
+                header: 'Username',
+                cell: ({ row }) => <div>{row.original.user.username}</div>,
+            },
+            {
                 header: 'Telepon',
-                cell: ({ row }) => <div>{row.getValue('phone')}</div>,
+                cell: ({ row }) => <div>{row.original.phone}</div>,
             },
             {
-                accessorKey: 'address',
-                header: 'Alamat',
-                cell: ({ row }) => <div>{row.getValue('address')}</div>,
-            },
-            {
-                id: 'actions',
                 header: 'Aksi',
                 cell: ({ row }) => {
                     return (
@@ -75,19 +74,17 @@ export default function DataKaryawan() {
                                 <DropdownMenuItem
                                     onClick={() => {
                                         setSelectedEmployee(row.original);
-                                        setIsEditDialogOpen(true);
+                                        setIsEditModalOpen(true);
                                     }}
                                 >
-                                    <Pencil />
                                     Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     onClick={() => {
                                         setSelectedEmployee(row.original);
-                                        setIsDetailDialogOpen(true);
+                                        setIsDetailModalOpen(true);
                                     }}
                                 >
-                                    <SquareArrowOutUpRight />
                                     Lihat Detail
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
@@ -95,10 +92,9 @@ export default function DataKaryawan() {
                                     className="text-red-600"
                                     onClick={() => {
                                         setSelectedEmployee(row.original);
-                                        setIsDialogOpen(true);
+                                        setIsDeleteModalOpen(true);
                                     }}
                                 >
-                                    <Trash2 className="text-red-600" />
                                     Hapus
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -120,11 +116,11 @@ export default function DataKaryawan() {
         },
     });
 
-    const updateEmployee = (updatedEmployee: Employee) => setEmployees((prev) => prev.map((employee) => (employee.id === updatedEmployee.id ? updatedEmployee : employee)));
+    const updateEmployee = (updatedEmployee: Employee) => setEmployees((prev) => prev.map((emp) => (emp.id === updatedEmployee.id ? updatedEmployee : emp)));
 
     const createEmployee = (newEmployee: Employee) => setEmployees((prev) => [...prev, newEmployee]);
 
-    const deleteEmployee = (id: number) => setEmployees((prev) => prev.filter((employee) => employee.id !== id));
+    const deleteEmployee = (id: string) => setEmployees((prev) => prev.filter((emp) => emp.id !== id));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -185,9 +181,7 @@ export default function DataKaryawan() {
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow key={row.id}>
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id} className="capitalize">
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </TableCell>
+                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                                         ))}
                                     </TableRow>
                                 ))
@@ -204,9 +198,9 @@ export default function DataKaryawan() {
             </div>
 
             <CreateModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} createEmployee={createEmployee} />
-            <DetailModal open={isDetailDialogOpen} onClose={() => setIsDetailDialogOpen(false)} employee={selectedEmployee} />
-            <EditModal open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} employee={selectedEmployee} updateEmployee={updateEmployee} />
-            <DeleteDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} employee={selectedEmployee} deleteEmployee={deleteEmployee} />
+            <EditModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} employee={selectedEmployee} updateEmployee={updateEmployee} />
+            <DeleteModal open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} employee={selectedEmployee} deleteEmployee={deleteEmployee} />
+            <DetailModal open={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} employee={selectedEmployee} />
         </AppLayout>
     );
 }

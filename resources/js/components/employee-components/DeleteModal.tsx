@@ -1,3 +1,5 @@
+// sudah disederhanakan
+// DeleteModal.tsx
 import {
     AlertDialog,
     AlertDialogAction,
@@ -8,20 +10,18 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DeleteDialogProps } from '@/types';
+import { DeleteModalProps } from '@/types';
 import { router } from '@inertiajs/react';
 
-export default function DeleteDialog({ open, onClose, deleteEmployee, employee }: DeleteDialogProps) {
+export default function DeleteModal({ open, onClose, deleteEmployee, employee }: DeleteModalProps) {
     const handleDelete = () => {
-        if (!employee) return;
+        if (!employee?.id) return;
 
         router.delete(route('data-karyawan.destroy', employee.id), {
-            preserveScroll: true,
             onSuccess: () => {
-                deleteEmployee(employee.id!);
+                deleteEmployee(employee.id);
                 onClose();
             },
-            onError: () => router.reload(),
         });
     };
 
@@ -31,12 +31,16 @@ export default function DeleteDialog({ open, onClose, deleteEmployee, employee }
                 <AlertDialogHeader>
                     <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Apakah Anda yakin ingin menghapus data <span className="font-bold text-black dark:text-white">{employee?.name}</span>? Tindakan ini tidak dapat dibatalkan.
+                        Apakah Anda yakin ingin menghapus data
+                        <strong> {employee?.user.name}</strong>? Tindakan tidak dapat dibatalkan.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
+
                 <AlertDialogFooter>
                     <AlertDialogCancel>Batal</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>Hapus</AlertDialogAction>
+                    <AlertDialogAction onClick={handleDelete} className="bg-red-600 text-white hover:bg-red-700">
+                        Hapus
+                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

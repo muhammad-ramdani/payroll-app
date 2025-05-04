@@ -54,7 +54,7 @@ export default function Password() {
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
+                    <HeadingSmall title="Update password" description="Pastikan akunmu pake password yang panjang sama acak biar aman" />
 
                     <form onSubmit={updatePassword} className="space-y-6">
                         <div className="grid gap-2">
@@ -68,7 +68,6 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="current-password"
-                                placeholder="Current password"
                             />
 
                             <InputError message={errors.current_password} />
@@ -85,7 +84,6 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
-                                placeholder="New password"
                             />
 
                             <InputError message={errors.password} />
@@ -101,7 +99,6 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
-                                placeholder="Confirm password"
                             />
 
                             <InputError message={errors.password_confirmation} />
@@ -110,13 +107,7 @@ export default function Password() {
                         <div className="flex items-center gap-4">
                             <Button disabled={processing}>Save password</Button>
 
-                            <Transition
-                                show={recentlySuccessful}
-                                enter="transition ease-in-out"
-                                enterFrom="opacity-0"
-                                leave="transition ease-in-out"
-                                leaveTo="opacity-0"
-                            >
+                            <Transition show={recentlySuccessful} enter="transition ease-in-out" enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
                                 <p className="text-sm text-neutral-600">Saved</p>
                             </Transition>
                         </div>

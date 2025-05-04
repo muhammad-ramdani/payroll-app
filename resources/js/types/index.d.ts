@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
 
@@ -22,6 +23,13 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+export interface NavReportItem {
+    title: string;
+    href: string;
+    icon?: LucideIcon | null;
+    isActive?: boolean;
+}
+
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -32,19 +40,17 @@ export interface SharedData {
 }
 
 export interface User {
-    id: number;
+    id: string;
     name: string;
     username: string;
     role: string;
-    avatar?: string;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
 }
 
 export interface Employee {
-    id: number;
-    name: string;
+    id: string;
+    user: User;
     phone: string;
     address: string;
     hire_date: Date | null;
@@ -57,34 +63,35 @@ export interface Employee {
     bpjs_health: string;
     bpjs_employment: string;
     income_tax: string;
-    [key: string]: string | number | Date | Blob | File | null | undefined;
+    [key: string]: any;
 }
 
 export interface Payroll {
     id: number;
-    employee: Employee;
-    period_month: string;
-    period_year: string;
-    total_attendance_days: string;
-    paid_holidays: string;
-    total_overtime_days: string;
-    basic_salary: string;
-    daily_overtime_pay: string;
-    total_basic_salary: string;
-    total_overtime_pay: string;
-    gross_salary: string;
-    bpjs_health_percent: string;
-    bpjs_employment_percent: string;
-    income_tax_percent: string;
-    total_deduction_percent: string;
-    total_deductions: string;
-    net_salary: string;
-    status: 'uncalculated' | 'paid' | 'unpaid';
+    user: User;
+    period_month: number;
+    period_year: number;
+    total_attendance_days: number;
+    paid_holidays: number;
+    total_overtime_days: number;
+    basic_salary: number;
+    daily_overtime_pay: number;
+    total_basic_salary: number;
+    total_overtime_pay: number;
+    gross_salary: number;
+    bpjs_health_percent: number;
+    bpjs_employment_percent: number;
+    income_tax_percent: number;
+    total_deduction_percent: number;
+    total_deductions: number;
+    net_salary: number;
+    salary_status: 'uncalculated' | 'unpaid' | 'paid_transfer' | 'paid_cash';
+    confirmation_status: 'blank' | 'pending_confirmation' | 'received';
 }
 
-export interface EmployeeAttendance {
+export interface Attendance {
     id: number;
-    employee: Employee;
+    user: User;
     date: string;
     clock_in: string | null;
     clock_out: string | null;
@@ -101,15 +108,15 @@ export interface EmployeeModalProps extends ModalProps {
 }
 
 export interface CreateModalProps extends ModalProps {
-    createEmployee: (employee: Employee) => void;
+    createEmployee: (data: Employee) => void;
 }
 
 export interface EditModalProps extends EmployeeModalProps {
-    updateEmployee: (employee: Employee) => void;
+    updateEmployee: (data: Employee) => void;
 }
 
-export interface DeleteDialogProps extends EmployeeModalProps {
-    deleteEmployee: (id: number) => void;
+export interface DeleteModalProps extends EmployeeModalProps {
+    deleteEmployee: (id: string) => void;
 }
 
 export interface PayrollModalProps extends ModalProps {

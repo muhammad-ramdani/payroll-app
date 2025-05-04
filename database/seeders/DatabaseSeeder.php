@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,20 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(EmployeeSeeder::class);
-        $this->call(EmployeeAttendanceSeeder::class);
-        $this->call(PayrollSeeder::class);
-
         User::factory()->create([
-            'name' => 'Ramdani',
+            'id' => Str::uuid(),
+            'name' => 'Pemilik Toko',
             'username' => 'admin',
             'role' => 'admin',
         ]);
-
-        User::factory()->create([
-            'name' => 'Karyawan',
-            'username' => 'karyawan',
-            'role' => 'karyawan',
-        ]);
+        
+        $this->call(EmployeeSeeder::class);
+        $this->call(AttendanceSeeder::class);
+        $this->call(PayrollSeeder::class);
     }
 }

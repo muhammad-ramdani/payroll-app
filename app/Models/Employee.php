@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Employee extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasUuids;
 
     protected $fillable = [
-        'name',
+        'id',
+        'user_id',
         'phone',
         'address',
         'hire_date',
@@ -25,4 +27,18 @@ class Employee extends Model
         'bpjs_employment',
         'income_tax',
     ];
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Employee $employee) {
+            if (!$employee->isForceDeleting()) {
+                $employee->user()->delete();
+            }
+        });
+    }
 }

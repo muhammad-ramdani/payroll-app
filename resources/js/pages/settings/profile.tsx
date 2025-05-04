@@ -48,20 +48,27 @@ export default function Profile() {
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Profile information" description="Update your name and username" />
+                    <HeadingSmall title="Info Profile" description="Ubah nama sama username kamu" />
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">Nama</Label>
 
                             <Input
                                 id="name"
                                 className="mt-1 block w-full"
                                 value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
+                                onChange={(e) =>
+                                    setData(
+                                        'name',
+                                        e.target.value
+                                            .replace(/[^a-zA-Z ,.'-]/g, '')
+                                            .toLowerCase()
+                                            .replace(/\s+/g, ' ')
+                                            .replace(/(^|[\s.-])(\w)/g, (_, prefix, char) => prefix + char.toUpperCase()),
+                                    )
+                                }
                                 required
-                                autoComplete="name"
-                                placeholder="Full name"
                             />
 
                             <InputError className="mt-2" message={errors.name} />
@@ -75,10 +82,8 @@ export default function Profile() {
                                 type="text"
                                 className="mt-1 block w-full"
                                 value={data.username}
-                                onChange={(e) => setData('username', e.target.value)}
+                                onChange={(e) => setData('username', e.target.value.toLowerCase().replace(/[^a-z0-9.]/g, ''))}
                                 required
-                                autoComplete="username"
-                                placeholder="Username"
                             />
 
                             <InputError className="mt-2" message={errors.username} />
@@ -86,10 +91,7 @@ export default function Profile() {
 
                         <div className="grid gap-2">
                             <Label htmlFor="role">Role</Label>
-                            <Badge
-                                className="mt-1 block w-full bg-neutral-100 px-3 py-1 text-sm/6.5 font-normal shadow-2xs dark:bg-neutral-900"
-                                variant="outline"
-                            >
+                            <Badge className="mt-1 block w-full bg-neutral-100 px-3 py-1 text-sm/6.5 font-normal shadow-2xs dark:bg-neutral-900" variant="outline">
                                 {data.role}
                             </Badge>
                         </div>
@@ -97,13 +99,7 @@ export default function Profile() {
                         <div className="flex items-center gap-4">
                             <Button disabled={processing}>Save</Button>
 
-                            <Transition
-                                show={recentlySuccessful}
-                                enter="transition ease-in-out"
-                                enterFrom="opacity-0"
-                                leave="transition ease-in-out"
-                                leaveTo="opacity-0"
-                            >
+                            <Transition show={recentlySuccessful} enter="transition ease-in-out" enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
                                 <p className="text-sm text-neutral-600">Saved</p>
                             </Transition>
                         </div>

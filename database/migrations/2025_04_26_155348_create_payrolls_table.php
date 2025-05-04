@@ -6,18 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('payrolls', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained()->onDelete('restrict');
+            $table->foreignUuid('user_id')->constrained()->onDelete('restrict');
             
             // Periode penggajian
-            $table->tinyInteger('period_month')->comment('Bulan penggajian 1-12');
-            $table->smallInteger('period_year')->comment('Tahun penggajian');
+            $table->tinyInteger('period_month');
+            $table->smallInteger('period_year');
             
             // Data kehadiran dan komponen gaji
             $table->unsignedSmallInteger('total_attendance_days')->nullable();
@@ -42,18 +39,16 @@ return new class extends Migration
             $table->unsignedMediumInteger('net_salary')->nullable();
             
             // Status penggajian
-            $table->enum('status', ['uncalculated', 'unpaid', 'paid'])->default('uncalculated');
+            $table->enum('salary_status', ['uncalculated', 'unpaid', 'paid_transfer', 'paid_cash'])->default('uncalculated');
+            $table->enum('confirmation_status', ['blank', 'pending_confirmation', 'received'])->default('blank');
             
             $table->timestamps();
             
             // Unique constraint untuk menghindari duplikasi data
-            $table->unique(['employee_id', 'period_month', 'period_year']);
+            $table->unique(['user_id', 'period_month', 'period_year']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('payrolls');

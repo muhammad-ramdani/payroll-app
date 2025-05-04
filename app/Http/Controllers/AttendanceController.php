@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\EmployeeAttendance;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
@@ -11,14 +11,14 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        $employee_attendances = EmployeeAttendance::with('employee')->get();
+        $attendances = Attendance::with('user')->where('user_id', auth()->id())->orderBy('date', 'desc')->get();
 
-        return Inertia::render('EmployeeAttendancePage', [
-            'employee_attendances' => $employee_attendances,
+        return Inertia::render('AttendancePage', [
+            'attendances' => $attendances,
         ]);
     }
 
-    public function update(Request $request, EmployeeAttendance $attendance)
+    public function update(Request $request, Attendance $attendance)
     {
         $validated = $request->validate([
             'clock_in'  => 'nullable|date_format:H:i:s',

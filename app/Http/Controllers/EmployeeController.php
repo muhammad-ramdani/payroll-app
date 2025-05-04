@@ -2,26 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Employee;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
 {
     public function index()
     {
-        $employees = Employee::all();
+        $employees = Employee::with('user')->get();
 
         return Inertia::render('EmployeeDataPage', [
             'employees' => $employees,
         ]);
     }
 
-    protected function validationRules()
+    protected function validationRules($forUpdate = false)
     {
-        return [
-            'name' => 'required|string|min:3|max:255',
-            'phone' => 'required|string|max:25',
+        $rules = [
+            'user.name' => 'required|string|max:250',
+            'phone' => 'nullable|string|max:25',
             'address' => 'nullable|string|max:255',
             'hire_date' => 'required|date',
             'bank_name' => 'nullable|string|max:255',
@@ -34,23 +36,50 @@ class EmployeeController extends Controller
             'bpjs_employment' => 'required|integer|min:0|max:100',
             'income_tax' => 'required|integer|min:0|max:100',
         ];
+
+        if(!$forUpdate) {
+            $rules['id'] = 'required|uuid|unique:employees,id';
+            $rules['user.username'] = 'required|string|max:250|unique:users,username';
+        }
+
+        return $rules;
     }
 
     public function store(Request $request)
     {
+        // Validasi request terlebih dahulu
         $validated = $request->validate($this->validationRules());
         
-        $employee = Employee::create($validated);
-
+        // Langsung pakai username dari request
+        $user = User::create([
+            'id' => $validated['id'],
+            'name' => $validated['user']['name'],
+            'username' => $validated['user']['username'], // Ambil dari frontend
+            'password' => Hash::make('password'),
+            'role' => 'karyawan',
+        ]);
+        
+        // Buat employee yang terkait dengan user
+        $employee = Employee::create([
+            'id' => $validated['id'],
+            'user_id' => $user->id,
+            ...$validated
+        ]);
+        
         return $this->handleResponse($request, $employee);
     }
-
+    
     public function update(Request $request, Employee $employee)
     {
-        $validated = $request->validate($this->validationRules());
+        $validated = $request->validate($this->validationRules(true));
         
-        $employee->update($validated);
-
+        // Pastikan data user masuk dengan benar
+        $userData = $validated['user'];
+        $employee->user()->update($userData); // Gunakan relasi langsung
+        
+        // Update employee data
+        $employee->update(collect($validated)->except('user')->all());
+        
         return $this->handleResponse($request, $employee);
     }
 
@@ -61,11 +90,6 @@ class EmployeeController extends Controller
             return response()->json($employee);
         }
         return redirect()->route('data-karyawan.index');
-    }
-
-    public function show(Employee $employee)
-    {
-        return response()->json($employee);
     }
 
     public function destroy(Employee $employee)

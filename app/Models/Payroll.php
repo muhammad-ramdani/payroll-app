@@ -11,7 +11,7 @@ class Payroll extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_id',
+        'user_id',
         'period_month',
         'period_year',
         'total_attendance_days',
@@ -28,35 +28,18 @@ class Payroll extends Model
         'total_deduction_percent',
         'total_deductions',
         'net_salary',
-        'status'
+        'salary_status',
+        'confirmation_status',
     ];
 
-    public function employee()
+    public function user()
     {
-        return $this->belongsTo(Employee::class)->withTrashed();
+        return $this->belongsTo(User::class);
     }
 
-    // protected $casts = [
-    //     'period_month' => 'integer',
-    //     'period_year' => 'integer',
-    //     'basic_salary' => 'integer',
-    //     'daily_overtime_pay' => 'integer',
-    //     'total_basic_salary' => 'integer',
-    //     'total_overtime_pay' => 'integer',
-    //     'gross_salary' => 'integer',
-    //     'total_deduction_percent' => 'integer',
-    //     'total_deductions' => 'integer',
-    //     'net_salary' => 'integer',
-    //     'created_at' => 'datetime:Y-m-d',
-    //     'updated_at' => 'datetime:Y-m-d',
-    // ];
-    
-    /**
-     * Unique constraint validation
-     */
-    public static function existsForPeriod($employeeId, $month, $year): bool
+    public static function existsForPeriod($userId, $month, $year): bool
     {
-        return self::where('employee_id', $employeeId)
+        return self::where('user_id', $userId)
             ->where('period_month', $month)
             ->where('period_year', $year)
             ->exists();

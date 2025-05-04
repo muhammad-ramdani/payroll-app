@@ -10,12 +10,23 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, string $role): mixed
     {
-        // Check if the user is authenticated and has the required role
+        // Cek apakah user terautentikasi dan memiliki role yang sesuai
         if ($request->user() && $request->user()->role === $role) {
             return $next($request);
         }
 
-        // If the user is not authenticated or does not have the required role, redirect to the login page
-        return redirect()->route('absensi');
+        // Jika user tidak terautentikasi, redirect ke absensi
+        // if (!$request->user()) {
+        //     return redirect()->route('absensi');
+        // }
+
+        // Jika user terautentikasi tapi role tidak sesuai
+        if ($request->user()->role === 'admin') {
+            // Admin yang mencoba akses role lain redirect ke dashboard
+            return redirect()->route('dashboard');
+        } else {
+            // Karyawan yang mencoba akses role admin redirect ke absensi
+            return redirect()->route('absensi');
+        }
     }
 }

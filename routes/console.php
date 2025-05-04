@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use App\Models\Employee;
 use App\Models\Payroll;
-use App\Models\EmployeeAttendance;
+use App\Models\Attendance;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -17,8 +17,8 @@ Schedule::call(function () {
 
     foreach ($employees as $employee) {
         // Buat hanya jika belum ada
-        EmployeeAttendance::firstOrCreate(
-            ['employee_id' => $employee->id, 'date' => $date],
+        Attendance::firstOrCreate(
+            ['user_id' => $employee->user_id, 'date' => $date],
             [
                 'clock_in'  => null,
                 'clock_out' => null,
@@ -26,18 +26,18 @@ Schedule::call(function () {
             ]
         );
     }
-})->dailyAt('06:30');
+})->dailyAt('00:02');
 // })->everyMinute();
 
 Schedule::call(function () {
      $date = now()->toDateString(); // Mendapatkan tanggal hari ini dalam format YYYY-MM-DD
 
         // Memperbarui status menjadi 'leave' untuk entri yang belum memiliki clock_in dan clock_out
-    EmployeeAttendance::whereDate('date', $date)
+    Attendance::whereDate('date', $date)
         ->whereNull('clock_in')
         ->whereNull('clock_out')
         ->update(['status' => 'leave']);
-})->dailyAt('14:00');
+})->dailyAt('13:30');
 // })->everyMinute();
 
 // Jadwal pembuatan payroll awal setiap tanggal 10
@@ -49,16 +49,17 @@ Schedule::call(function () {
         // Membuat payroll dengan data minimal jika belum ada
         Payroll::firstOrCreate(
             [
-                'employee_id' => $employee->id,
+                'user_id' => $employee->user_id,
                 'period_month' => $currentMonth,
                 'period_year' => $currentYear
             ],
             [
-                'status' => 'uncalculated',
+                'salary_status' => 'uncalculated',
+                'confirmation_status' => 'blank',
             ]
         );
     });
-})->monthlyOn(10, '06:00');
+})->monthlyOn(10, '00:02');
 // })->everyMinute();
 
 // Jadwal update payroll akhir bulan
@@ -68,7 +69,7 @@ Schedule::call(function () {
 
     Employee::whereNull('deleted_at')->each(function ($employee) use ($currentMonth, $currentYear) {
         // Cari payroll yang sudah dibuat di tanggal 10
-        $payroll = Payroll::where('employee_id', $employee->id)
+        $payroll = Payroll::where('user_id', $employee->user_id)
             ->where('period_month', $currentMonth)
             ->where('period_year', $currentYear)
             ->first();
@@ -76,15 +77,15 @@ Schedule::call(function () {
         if (!$payroll) {
             // Fallback jika payroll belum dibuat
             $payroll = Payroll::create([
-                'employee_id' => $employee->id,
+                'user_id' => $employee->user_id,
                 'period_month' => $currentMonth,
                 'period_year' => $currentYear,
-                'status' => 'unpaid'
+                'salary_status' => 'unpaid'
             ]);
         }
 
         // Ambil semua record dulu
-        $attendances = EmployeeAttendance::where('employee_id', $employee->id)
+        $attendances = Attendance::where('user_id', $employee->user_id)
             ->where('status', 'finished')
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
@@ -148,7 +149,7 @@ Schedule::call(function () {
             'total_deduction_percent' => $totalDeductionPercent,
             'total_deductions' => $totalDeductions,
             'net_salary' => $netSalary,
-            'status' => 'unpaid'
+            'salary_status' => 'unpaid'
         ]);
     });
 })->lastDayOfMonth('21:00');
