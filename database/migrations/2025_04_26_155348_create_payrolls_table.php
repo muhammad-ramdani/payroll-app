@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payrolls', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->constrained()->onDelete('restrict');
             
             // Periode penggajian
@@ -21,6 +21,14 @@ return new class extends Migration
             $table->unsignedTinyInteger('paid_holidays')->nullable();
             $table->unsignedSmallInteger('total_overtime_days')->nullable();
             
+            // Komponen bonus/penalty
+            $table->unsignedMediumInteger('bonus_amount')->nullable();
+            $table->unsignedMediumInteger('penalty_amount')->nullable();
+            $table->unsignedSmallInteger('total_punctual_days')->nullable();
+            $table->unsignedSmallInteger('total_late_days')->nullable();
+            $table->unsignedMediumInteger('total_bonus')->nullable();
+            $table->unsignedMediumInteger('total_penalty')->nullable();
+
             // Komponen penghasilan
             $table->unsignedMediumInteger('basic_salary')->nullable();
             $table->unsignedMediumInteger('daily_overtime_pay')->nullable();
@@ -44,7 +52,7 @@ return new class extends Migration
             
             $table->timestamps();
             
-            // Unique constraint untuk menghindari duplikasi data
+            // Unique constraint
             $table->unique(['user_id', 'period_month', 'period_year']);
         });
     }

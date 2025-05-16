@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Modal from '@/components/ui/modal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { CreateModalProps } from '@/types';
 import { addDays, format, startOfDay } from 'date-fns';
@@ -63,22 +64,39 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
     return (
         <Modal open={open} onClose={onClose} title="Tambah Data Karyawan">
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Nama */}
-                <div className="grid gap-2">
-                    <Label>
-                        Nama<span className="text-red-600">*</span>
-                    </Label>
-                    <Input
-                        minLength={3}
-                        maxLength={250}
-                        value={data.user.name}
-                        onChange={(e) => {
-                            const formattedName = formatName(e.target.value);
-                            setData('user', { ...data.user, name: formattedName, username: generateUsername(formattedName) });
-                        }}
-                        onKeyDown={createKeyDownHandler(letterPattern)}
-                    />
-                    <InputError message={errors['user.name']} />
+                <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="col-span-2 grid gap-2">
+                        <Label>
+                            Nama<span className="text-red-600">*</span>
+                        </Label>
+                        <Input
+                            minLength={3}
+                            maxLength={250}
+                            value={data.user.name}
+                            onChange={(e) => {
+                                const formattedName = formatName(e.target.value);
+                                setData('user', { ...data.user, name: formattedName, username: generateUsername(formattedName) });
+                            }}
+                            onKeyDown={createKeyDownHandler(letterPattern)}
+                        />
+                        <InputError message={errors['user.name']} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label>
+                            Shift Kerja<span className="text-red-600">*</span>
+                        </Label>
+                        <Select value={data.shift_type} onValueChange={(value) => setData('shift_type', value as 'Pagi' | 'Siang')}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Pilih shift" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Pagi">Shift Pagi</SelectItem>
+                                <SelectItem value="Siang">Shift Siang</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <InputError message={errors.shift_type} />
+                    </div>
                 </div>
 
                 {/* Alamat */}

@@ -4,25 +4,15 @@ import DeleteModal from '@/components/employee-components/DeleteModal';
 import DetailModal from '@/components/employee-components/DetailModal';
 import EditModal from '@/components/employee-components/EditModal';
 import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Employee } from '@/types';
+import { Employee } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
+import { flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import { ArrowUpDown, MoreHorizontal, Plus } from 'lucide-react';
 import { useState } from 'react';
-
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Data Karyawan', href: '/data-karyawan' }];
 
 export default function DataKaryawan() {
     const [employees, setEmployees] = useState<Employee[]>(usePage<{ employees: Employee[] }>().props.employees);
@@ -31,9 +21,6 @@ export default function DataKaryawan() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [sorting, setSorting] = useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
     const table = useReactTable({
         data: employees,
@@ -103,17 +90,9 @@ export default function DataKaryawan() {
                 },
             },
         ],
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        state: {
-            sorting,
-            columnFilters,
-            columnVisibility,
-        },
     });
 
     const updateEmployee = (updatedEmployee: Employee) => setEmployees((prev) => prev.map((emp) => (emp.id === updatedEmployee.id ? updatedEmployee : emp)));
@@ -123,7 +102,7 @@ export default function DataKaryawan() {
     const deleteEmployee = (id: string) => setEmployees((prev) => prev.filter((emp) => emp.id !== id));
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={[{ title: 'Data Karyawan', href: '/' }]}>
             <Head title="Data Karyawan" />
             <div className="w-full p-4">
                 <div className="flex items-center py-4">
@@ -138,31 +117,6 @@ export default function DataKaryawan() {
                         <Plus />
                         Tambah
                     </Button>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="ml-auto">
-                                Columns <ChevronDown />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            {table
-                                .getAllColumns()
-                                .filter((column) => column.getCanHide())
-                                .map((column) => {
-                                    return (
-                                        <DropdownMenuCheckboxItem
-                                            key={column.id}
-                                            className="capitalize"
-                                            checked={column.getIsVisible()}
-                                            onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                                        >
-                                            {column.id}
-                                        </DropdownMenuCheckboxItem>
-                                    );
-                                })}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
                 </div>
 
                 <div className="rounded-md border">

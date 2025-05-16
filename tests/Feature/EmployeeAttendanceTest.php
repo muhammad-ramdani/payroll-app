@@ -28,7 +28,7 @@ test('berhasil update clock in dan status working', function () {
     ]);
 
     $this->actingAs(User::factory()->create()) // User biasa
-         ->patch(route('absensi.update', $attendance), [
+         ->patch(route('rekap-absensi.update', $attendance), [
             'clock_in' => now()->format('H:i:s'),
             'status' => 'working'
          ])
@@ -50,7 +50,7 @@ test('berhasil update clock out dan status finished', function () {
     ]);
 
     $this->actingAs(User::factory()->create())
-         ->patch(route('absensi.update', $attendance), [
+         ->patch(route('rekap-absensi.update', $attendance), [
             'clock_out' => now()->format('H:i:s'),
             'status' => 'finished'
          ])
@@ -73,7 +73,7 @@ test('gagal update clock out tanpa clock in', function () {
     ]);
 
     $response = $this->actingAs(User::factory()->create())
-         ->patch(route('absensi.update', $attendance), [
+         ->patch(route('rekap-absensi.update', $attendance), [
             'clock_out' => '17:00:00',
             'status' => 'finished'
          ]);
@@ -88,7 +88,7 @@ test('validasi format waktu untuk clock_in dan clock_out', function () {
     ]);
 
     $response = $this->actingAs(User::factory()->create())
-         ->patch(route('absensi.update', $attendance), [
+         ->patch(route('rekap-absensi.update', $attendance), [
             'clock_in' => 'invalid-time',
             'clock_out' => 'invalid-time',
             'status' => 'working'
@@ -104,7 +104,7 @@ test('validasi pilihan status', function () {
     ]);
 
     $response = $this->actingAs(User::factory()->create())
-         ->patch(route('absensi.update', $attendance), [
+         ->patch(route('rekap-absensi.update', $attendance), [
             'status' => 'invalid-status'
          ]);
 

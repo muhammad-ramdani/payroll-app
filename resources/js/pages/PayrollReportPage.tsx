@@ -1,19 +1,13 @@
 'use client';
 
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContentRp } from '@/components/ui/chart';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Payroll } from '@/types';
+import { Payroll } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Laporan Penggajian',
-        href: '/',
-    },
-];
 
 export default function PayrollReportPage({ payrolls }: { payrolls: Payroll[] }) {
     const [selectedSalaryType, setSelectedSalaryType] = useState<'net_salary' | 'gross_salary'>('net_salary');
@@ -61,7 +55,7 @@ export default function PayrollReportPage({ payrolls }: { payrolls: Payroll[] })
     ) satisfies ChartConfig;
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={[{ title: 'Laporan Penggajian', href: '/' }]}>
             <Head title="Laporan Penggajian" />
             <div className="space-y-4 p-4">
                 <div className="flex gap-4">
@@ -89,8 +83,8 @@ export default function PayrollReportPage({ payrolls }: { payrolls: Payroll[] })
                     </Select>
                 </div>
 
-                <div className="">
-                    <ChartContainer config={chartConfig} className="w-full">
+                <ScrollArea className="pb-4">
+                    <ChartContainer config={chartConfig} className="min-h-[80vh] sm:min-h-auto">
                         <BarChart data={chartData}>
                             <CartesianGrid vertical={false} strokeDasharray="5 5" />
                             <XAxis dataKey="month" tickLine={false} axisLine={false} tickFormatter={(value) => value.slice(0, 3)} />
@@ -99,7 +93,8 @@ export default function PayrollReportPage({ payrolls }: { payrolls: Payroll[] })
                             <Bar dataKey="total" fill="var(--color-total)" radius={[8, 8, 0, 0]} barSize={50} />
                         </BarChart>
                     </ChartContainer>
-                </div>
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
             </div>
         </AppLayout>
     );

@@ -1,56 +1,42 @@
-// Imports: Dikelompokkan berdasarkan jenis dan sumber
-// -----------------------------------------------------------------------------
-import { Head, router, usePage } from '@inertiajs/react';
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { ClockArrowDown, ClockArrowUp } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+// AttendanceRecapPage.tsx
 import { calculateDistance, getCurrentPosition } from '@/utils/geolocation';
+import { Head, router, usePage } from '@inertiajs/react';
+import { ClockArrowDown, ClockArrowUp } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Komponen UI Kustom
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 
 // Tipe Data dan Konstanta
-import { Attendance, type BreadcrumbItem } from '@/types';
+import { Attendance, AttendanceBonusPenaltySetting, AttendanceRule } from '@/types';
 
-// Konfigurasi Konstanta
-// -----------------------------------------------------------------------------
-const PAGE_BREADCRUMBS: BreadcrumbItem[] = [{ title: 'Absensi Karyawan', href: '/absensi' }];
-
-const ATTENDANCE_STATUS_CONFIG: Record<Attendance['status'], [string, string]> = {
-    not_started: ['Belum Hadir', 'p-1.5 text-amber-500 bg-amber-500/10'],
-    working: ['Sedang Bekerja', 'p-1.5 text-emerald-500 bg-emerald-500/10'],
-    finished: ['Sudah Pulang', 'p-1.5 text-blue-500 bg-blue-500/10'],
-    leave: ['Tidak Masuk', 'p-1.5 text-rose-500 bg-rose-500/10'],
+const formatTimeToHHMM = (timeString: string) => {
+    return timeString.split(':').slice(0, 2).join(':');
 };
 
-// Fungsi Utilitas
-// -----------------------------------------------------------------------------
-/**
- * Format timestamp ke format waktu HH:MM:SS
- * @param timestampMs - Timestamp dalam milidetik
- */
+const attendanceStatus = {
+    not_started: ['Belum Hadir', 'text-amber-500 bg-amber-500/10'],
+    working: ['Sedang Bekerja', 'text-emerald-500 bg-emerald-500/10'],
+    finished: ['Sudah Pulang', 'text-blue-500 bg-blue-500/10'],
+    leave: ['Libur Cuti', 'text-rose-500 bg-rose-500/10'],
+    sick: ['Libur Sakit', 'text-fuchsia-500 bg-fuchsia-500/10'],
+};
+
 const formatTimeToHHMMSS = (timestampMs: number) => new Date(timestampMs).toLocaleTimeString('en-GB');
+const formatLongDate = (date: Date) => {
+    return new Intl.DateTimeFormat('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    }).format(date);
+};
 
-/**
- * Format tanggal ke format 'Hari, Tanggal' (Contoh: Senin, 1)
- * @param date - Objek Date yang akan diformat
- */
-const formatLongDate = (date: Date) => new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric' }).format(date);
-
-/**
- * Menghitung durasi kerja berdasarkan jam masuk dan keluar
- * @param clockInTime - Waktu masuk (format HH:mm:ss)
- * @param clockOutTime - Waktu keluar (format HH:mm:ss)
- * @param currentTimestamp - Timestamp saat ini untuk kalkulasi real-time
- */
 const calculateWorkingDuration = (clockInTime?: string | null, clockOutTime?: string | null, currentTimestamp = Date.now()): string => {
     if (!clockInTime) return '-';
 
-    // Konversi string waktu ke objek Date
     const parseTimeStringToDate = (time: string) => {
         const [hours, minutes, seconds] = time.split(':').map(Number);
         const date = new Date(currentTimestamp);
@@ -61,10 +47,7 @@ const calculateWorkingDuration = (clockInTime?: string | null, clockOutTime?: st
     const startTime = parseTimeStringToDate(clockInTime);
     const endTime = clockOutTime ? parseTimeStringToDate(clockOutTime) : new Date(currentTimestamp);
 
-    // Hitung selisih waktu dalam milidetik
     const durationInMilliseconds = endTime.getTime() - startTime.getTime();
-
-    // Format durasi ke HH:mm:ss
     const padWithZero = (number: number) => String(number).padStart(2, '0');
     const hours = Math.floor(durationInMilliseconds / 3_600_000);
     const minutes = Math.floor((durationInMilliseconds % 3_600_000) / 60_000);
@@ -73,26 +56,22 @@ const calculateWorkingDuration = (clockInTime?: string | null, clockOutTime?: st
     return `${padWithZero(hours)}:${padWithZero(minutes)}:${padWithZero(seconds)}`;
 };
 
-// Komponen Status Badge
-// -----------------------------------------------------------------------------
 const AttendanceStatusBadge = ({ status }: { status: Attendance['status'] }) => {
-    const [label, className] = ATTENDANCE_STATUS_CONFIG[status];
+    const [label, className] = attendanceStatus[status];
     return <Badge className={className}>{label}</Badge>;
 };
 
-// Komponen Utama: Absensi Karyawan
-// -----------------------------------------------------------------------------
-export default function AttendancePage() {
-    // Inisialisasi Data dan State Dasar
-    // -------------------------------------------------------------------------
+export default function AttendanceRecapPage() {
     const {
-        props: { attendances },
-    } = usePage<{ attendances: Attendance[] }>();
+        props: { attendances, attendanceRules, bonusPenaltySettings },
+    } = usePage<{
+        attendances: Attendance[];
+        attendanceRules: Record<number, AttendanceRule>;
+        bonusPenaltySettings: AttendanceBonusPenaltySetting;
+    }>();
     const [attendanceRecords, setAttendanceRecords] = useState(attendances);
     const [currentTimestamp, setCurrentTimestamp] = useState(Date.now());
 
-    // Efek Samping: Update waktu real-time dan sinkronisasi data
-    // -------------------------------------------------------------------------
     useEffect(() => {
         const intervalId = setInterval(() => setCurrentTimestamp(Date.now()), 1000);
         return () => clearInterval(intervalId);
@@ -102,66 +81,6 @@ export default function AttendancePage() {
         setAttendanceRecords(attendances);
     }, [attendances]);
 
-    // Ekstraksi Data Unik untuk Filter
-    // -------------------------------------------------------------------------
-    const { uniqueMonths, uniqueYears } = useMemo(() => {
-        const months = new Set<number>();
-        const years = new Set<number>();
-
-        attendanceRecords.forEach((record) => {
-            const date = new Date(record.date);
-            months.add(date.getMonth());
-            years.add(date.getFullYear());
-        });
-
-        return {
-            uniqueMonths: Array.from(months).sort((a, b) => a - b),
-            uniqueYears: Array.from(years).sort((a, b) => a - b),
-        };
-    }, [attendanceRecords]);
-
-    // State dan Validasi Filter
-    // -------------------------------------------------------------------------
-    const [selectedMonth, setSelectedMonth] = useState<number>(() => {
-        // Logika inisialisasi bulan default
-        const currentMonth = new Date().getMonth();
-        const initialMonths = attendances.map((record) => new Date(record.date).getMonth());
-        const uniqueInitialMonths = [...new Set(initialMonths)].sort((a, b) => a - b);
-        return uniqueInitialMonths.includes(currentMonth) ? currentMonth : (uniqueInitialMonths[0] ?? currentMonth);
-    });
-
-    const [selectedYear, setSelectedYear] = useState<number>(() => {
-        // Logika inisialisasi tahun default
-        const currentYear = new Date().getFullYear();
-        const initialYears = attendances.map((record) => new Date(record.date).getFullYear());
-        const uniqueInitialYears = [...new Set(initialYears)].sort((a, b) => a - b);
-        return uniqueInitialYears.includes(currentYear) ? currentYear : (uniqueInitialYears[0] ?? currentYear);
-    });
-
-    // Validasi nilai filter saat data berubah
-    useEffect(() => {
-        if (uniqueMonths.length > 0 && !uniqueMonths.includes(selectedMonth)) {
-            setSelectedMonth(uniqueMonths[0]);
-        }
-    }, [uniqueMonths, selectedMonth]);
-
-    useEffect(() => {
-        if (uniqueYears.length > 0 && !uniqueYears.includes(selectedYear)) {
-            setSelectedYear(uniqueYears[0]);
-        }
-    }, [uniqueYears, selectedYear]);
-
-    // Filter Data Berdasarkan Bulan dan Tahun
-    // -------------------------------------------------------------------------
-    const filteredData = useMemo(() => {
-        return attendanceRecords.filter((record) => {
-            const date = new Date(record.date);
-            return date.getMonth() === selectedMonth && date.getFullYear() === selectedYear;
-        });
-    }, [attendanceRecords, selectedMonth, selectedYear]);
-
-    // Handler Update Absensi
-    // -------------------------------------------------------------------------
     const handleUpdateAttendance = useCallback(async (id: number, data: { clock_in?: string; clock_out?: string; status: Attendance['status'] }) => {
         setAttendanceRecords((prev) => prev.map((record) => (record.id === id ? { ...record, ...data } : record)));
         await router.patch(route('absensi.update', id), data);
@@ -171,8 +90,6 @@ export default function AttendancePage() {
         async (actionType: 'clock_in' | 'clock_out', recordId: number) => {
             try {
                 const { latitude, longitude } = await getCurrentPosition();
-
-                // Ambil semua store yang terdaftar
                 const stores = [];
                 let storeCount = 1;
 
@@ -186,7 +103,6 @@ export default function AttendancePage() {
                     storeCount++;
                 }
 
-                // Cek jarak ke semua store
                 const isWithinRadius = stores.some((store) => {
                     const distance = calculateDistance(latitude, longitude, store.lat, store.lng);
                     return distance <= store.radius;
@@ -210,124 +126,118 @@ export default function AttendancePage() {
         [handleUpdateAttendance],
     );
 
-    // Konfigurasi Tabel
-    // -------------------------------------------------------------------------
-    const tableColumns = useMemo<ColumnDef<Attendance>[]>(
-        () => [
-            {
-                header: 'Tanggal',
-                cell: ({ row }) => formatLongDate(new Date(row.original.date)),
-            },
-            {
-                header: 'Jam Masuk',
-                cell: ({ row }) => {
-                    const record = row.original;
-                    if (record.status === 'leave') return '-';
-
-                    return record.clock_in ? (
-                        record.clock_in
-                    ) : (
-                        <Button variant="secondary" onClick={() => handleAttendanceAction('clock_in', record.id)}>
-                            <ClockArrowDown />
-                        </Button>
-                    );
-                },
-            },
-            {
-                header: 'Jam Pulang',
-                cell: ({ row }) => {
-                    const record = row.original;
-                    if (record.status === 'leave') return '-';
-
-                    return record.clock_out ? (
-                        record.clock_out
-                    ) : (
-                        <Button variant="secondary" disabled={!record.clock_in} onClick={() => handleAttendanceAction('clock_out', record.id)}>
-                            <ClockArrowUp />
-                        </Button>
-                    );
-                },
-            },
-            {
-                header: 'Waktu Kerja',
-                cell: ({ row }) => calculateWorkingDuration(row.original.clock_in, row.original.clock_out, currentTimestamp),
-            },
-            {
-                header: 'Status',
-                cell: ({ row }) => <AttendanceStatusBadge status={row.original.status} />,
-            },
-        ],
-        [currentTimestamp, handleAttendanceAction],
-    );
-
-    const attendanceTable = useReactTable({
-        data: filteredData,
-        columns: tableColumns,
-        getCoreRowModel: getCoreRowModel(),
-    });
-
-    // Render UI
-    // -------------------------------------------------------------------------
     return (
-        <AppLayout breadcrumbs={PAGE_BREADCRUMBS}>
+        <AppLayout breadcrumbs={[{ title: 'Absensi Karyawan', href: '/' }]}>
             <Head title="Absensi Karyawan" />
-
-            {/* Konten Utama */}
-            <div className="overflow-x-auto p-4">
-                {/* Kontrol Filter Bulan dan Tahun */}
-                <div className="mb-4 flex gap-4">
-                    <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                        <SelectTrigger className="sm:w-40">
-                            <SelectValue placeholder="Pilih Bulan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {uniqueMonths.map((month) => (
-                                <SelectItem key={month} value={month.toString()}>
-                                    {new Date(0, month).toLocaleDateString('id-ID', { month: 'long' })}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                        <SelectTrigger className="sm:w-40">
-                            <SelectValue placeholder="Pilih Tahun" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {uniqueYears.map((year) => (
-                                <SelectItem key={year} value={year.toString()}>
-                                    {year}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+            {attendanceRecords.length === 0 ? (
+                // Tampilan ketika tidak ada data
+                <div className="flex h-9/10 items-center justify-center">
+                    <p className="text-muted-foreground text-sm">Absensi baru akan tersedia pukul 06:30 pagi.</p>
                 </div>
+            ) : (
+                <>
+                    <div className="mx-4 mt-16 flex justify-center">
+                        {attendanceRecords.map((record) => (
+                            // rounded-lg border p-15
+                            <div key={record.id} className="space-y-8 text-center">
+                                {/* Tanggal */}
+                                <p className="text-sm">{formatLongDate(new Date(record.date))}</p>
 
-                {/* Tabel Data Absensi */}
-                <div className="rounded-md border">
-                    <Table>
-                        <TableHeader>
-                            {attendanceTable.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
-                                        <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
+                                {/* Shift */}
+                                <div className="text-sm">
+                                    Shift
+                                    <span className={`${record.shift_type === 'Pagi' ? 'text-blue-500' : 'text-yellow-500'}`}> {record.shift_type}</span>
+                                </div>
 
-                        <TableBody>
-                            {attendanceTable.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            </div>
+                                {/* Jam Masuk */}
+                                <div className="space-y-4">
+                                    <p className="text-muted-foreground text-sm">Jam Masuk</p>
+                                    {record.status === 'leave' ? (
+                                        <p className="text-sm font-medium">-</p>
+                                    ) : record.clock_in ? (
+                                        <p className="text-sm font-medium">{record.clock_in}</p>
+                                    ) : (
+                                        <Button variant="secondary" onClick={() => handleAttendanceAction('clock_in', record.id)}>
+                                            <ClockArrowDown className="mx-11" />
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Jam Pulang */}
+                                <div className="space-y-4">
+                                    <p className="text-muted-foreground text-sm">Jam Pulang</p>
+                                    {record.status === 'leave' ? (
+                                        <p className="text-sm font-medium">-</p>
+                                    ) : record.clock_out ? (
+                                        <p className="text-sm font-medium">{record.clock_out}</p>
+                                    ) : (
+                                        <Button variant="secondary" disabled={!record.clock_in} onClick={() => handleAttendanceAction('clock_out', record.id)}>
+                                            <ClockArrowUp className="mx-11" />
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Waktu Kerja */}
+                                <div className="space-y-4">
+                                    <p className="text-muted-foreground text-sm">Waktu Kerja</p>
+                                    <p className="text-sm font-medium">{calculateWorkingDuration(record.clock_in, record.clock_out, currentTimestamp)}</p>
+                                </div>
+
+                                {/* Status */}
+                                <div className="space-y-4">
+                                    <p className="text-muted-foreground text-sm">Status Kehadiran</p>
+                                    <div>
+                                        <AttendanceStatusBadge status={record.status} />
+                                    </div>
+                                </div>
+
+                                {/* tombol tidak masuk */}
+                                {/* <p>Tidak Masuk Kerja</p> */}
+                                <div className="space-x-4">
+                                    {record.status === 'not_started' && (
+                                        <Button
+                                            className="mt-8 border border-fuchsia-500 bg-transparent text-fuchsia-500 hover:bg-fuchsia-500/15"
+                                            onClick={() => handleUpdateAttendance(record.id, { status: 'sick' })}
+                                        >
+                                            Libur Sakit
+                                        </Button>
+                                    )}
+
+                                    {record.status === 'not_started' && (
+                                        <Button
+                                            className="mt-8 border border-rose-500 bg-transparent text-rose-500 hover:bg-rose-500/15"
+                                            onClick={() => handleUpdateAttendance(record.id, { status: 'leave' })}
+                                        >
+                                            Libur Cuti
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="text-muted-foreground mx-4 mt-32 mb-4 space-y-2">
+                        <p className="text-sm font-semibold">Catatan:</p>
+                        <ul className="ml-5 list-disc space-y-1 text-sm">
+                            <li>absensi Kehadiran "Jam Masuk" dan "Jam Pulang" hanya bisa dilakukan di toko saja, kecuali tombol "Tidak Masuk Kerja" bisa dilakukan dimana saja.</li>
+                            <li>Jika sampai jam 14:00 tidak menekan tombol "Jam Masuk", maka status kehadiran akan otomatis menjadi "Tidak Masuk".</li>
+                            <li>
+                                Bagi karyawan shift Pagi, jika masuk sebelum pukul {formatTimeToHHMM(attendanceRules[1].punctual_end)}, akan mendapatkan bonus sebesar Rp{' '}
+                                {bonusPenaltySettings.bonus_amount.toLocaleString('id-ID')} per hari. Sebaliknya, jika masuk setelah pukul{' '}
+                                {formatTimeToHHMM(attendanceRules[1].late_threshold)}, akan dikenakan potongan gaji sebesar Rp{' '}
+                                {bonusPenaltySettings.penalty_amount.toLocaleString('id-ID')} per hari.
+                            </li>
+                            <li>
+                                Bagi karyawan shift Siang, jika masuk sebelum pukul {formatTimeToHHMM(attendanceRules[2].punctual_end)}, akan mendapatkan bonus sebesar Rp{' '}
+                                {bonusPenaltySettings.bonus_amount.toLocaleString('id-ID')} per hari. Sebaliknya, jika masuk setelah pukul{' '}
+                                {formatTimeToHHMM(attendanceRules[2].late_threshold)}, akan dikenakan potongan gaji sebesar Rp{' '}
+                                {bonusPenaltySettings.penalty_amount.toLocaleString('id-ID')} per hari.
+                            </li>
+                            <li>Waktu kerja yang melebihi 8.5 jam akan dianggap sebagai kerja lembur dan akan diberikan gaji lembur harian.</li>
+                        </ul>
+                    </div>
+                </>
+            )}
         </AppLayout>
     );
 }

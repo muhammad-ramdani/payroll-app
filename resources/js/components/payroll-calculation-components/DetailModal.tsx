@@ -1,7 +1,7 @@
+import { Badge } from '@/components/ui/badge';
 import Modal from '@/components/ui/modal';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { PayrollModalProps } from '@/types';
-import { Badge } from '@/components/ui/badge';
 
 export default function DetailModal({ open, onClose, payroll }: PayrollModalProps) {
     if (!payroll) return null;
@@ -61,16 +61,54 @@ export default function DetailModal({ open, onClose, payroll }: PayrollModalProp
                         </TableCell>
                     </TableRow>
                     <TableRow>
+                        <TableCell>Total Bonus Tepat Waktu</TableCell>
+                        <TableCell>:</TableCell>
+                        <TableCell className="text-sm/7">
+                            Total Tepat Waktu
+                            <span className="text-yellow-500"> × </span>
+                            Bonus Tepat Waktu Harian
+                            <br />
+                            {payroll.total_punctual_days}
+                            <span className="text-yellow-500"> × </span>
+                            Rp {payroll.bonus_amount.toLocaleString('id-ID')}
+                            <br />
+                            <span className="text-blue-500">Rp {payroll.total_bonus.toLocaleString('id-ID')}</span>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Total Potongan Telat</TableCell>
+                        <TableCell>:</TableCell>
+                        <TableCell className="text-sm/7">
+                            Total Telat
+                            <span className="text-yellow-500"> × </span>
+                            Potongan Telat Harian
+                            <br />
+                            {payroll.total_late_days}
+                            <span className="text-yellow-500"> × </span>
+                            Rp {payroll.penalty_amount.toLocaleString('id-ID')}
+                            <br />
+                            <span className="text-blue-500">Rp {payroll.total_penalty.toLocaleString('id-ID')}</span>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
                         <TableCell>Total Gaji Kotor</TableCell>
                         <TableCell>:</TableCell>
                         <TableCell>
                             Total Gaji Pokok
                             <span className="text-yellow-500"> + </span>
                             Total Gaji Lembur
+                            <span className="text-yellow-500"> + </span>
+                            Total Bonus Tepat Waktu
+                            <span className="text-yellow-500"> - </span>
+                            Total Potongan Telat
                             <br />
                             Rp {payroll.total_basic_salary.toLocaleString('id-ID')}
                             <span className="text-yellow-500"> + </span>
                             Rp {payroll.total_overtime_pay.toLocaleString('id-ID')}
+                            <span className="text-yellow-500"> + </span>
+                            Rp {payroll.total_bonus.toLocaleString('id-ID')}
+                            <span className="text-yellow-500"> - </span>
+                            Rp {payroll.total_penalty.toLocaleString('id-ID')}
                             <br />
                             <span className="text-blue-500">Rp {payroll.gross_salary.toLocaleString('id-ID')}</span>
                         </TableCell>

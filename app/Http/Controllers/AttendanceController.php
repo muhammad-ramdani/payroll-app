@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\AttendanceRuleSetting;
+use App\Models\AttendanceBonusPenaltySetting;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
@@ -11,9 +13,24 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        $attendances = Attendance::with('user')->where('user_id', auth()->id())->orderBy('date', 'desc')->get();
+        $attendances = Attendance::with('user')->where('user_id', auth()->id())->whereDate('date', now())->get();
+
+        $attendanceRules = AttendanceRuleSetting::whereIn('id', [1, 2])->get()->keyBy('id');
+
+        $bonusPenaltySettings = AttendanceBonusPenaltySetting::find(1);
 
         return Inertia::render('AttendancePage', [
+            'attendances' => $attendances,
+            'attendanceRules' => $attendanceRules,
+            'bonusPenaltySettings' => $bonusPenaltySettings,
+        ]);
+    }
+
+    public function recap()
+    {
+        $attendances = Attendance::with('user')->where('user_id', auth()->id())->orderBy('date', 'desc')->get();
+
+        return Inertia::render('AttendanceRecapPage', [
             'attendances' => $attendances,
         ]);
     }
@@ -23,7 +40,7 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'clock_in'  => 'nullable|date_format:H:i:s',
             'clock_out' => 'nullable|date_format:H:i:s',
-            'status'    => 'required|in:not_started,working,finished,leave',
+            'status'    => 'required|in:not_started,working,finished,leave,sick',
         ]);
 
         // Ambil nilai existing

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Employee;
 use App\Models\Attendance;
+use App\Models\Shift;
 use Illuminate\Database\Seeder;
 use Carbon\CarbonPeriod;
 
@@ -17,47 +18,96 @@ class AttendanceSeeder extends Seeder
         $period = CarbonPeriod::create($startDate, $endDate);
 
         foreach ($period as $date) {
-            foreach ($employees as $employee) {
-                $isToday = $date->isToday();
+            $isToday = $date->isToday();
+            $shiftMap = [];
 
+            // Persiapan mapping shift untuk hari ini
+            if ($isToday) {
+                // Ambil data shift dari database
+                $shifts = Shift::whereIn('user_id', $employees->pluck('user_id'))
+                    ->get()
+                    ->keyBy('user_id');
+                
+                foreach ($employees as $employee) {
+                    $shiftMap[$employee->id] = $shifts[$employee->user_id]->shift_type ?? 'Pagi';
+                }
+            }
+
+            foreach ($employees as $employee) {
                 if ($isToday) {
-                    // Hari ini: status not_started tanpa jam
                     Attendance::create([
-                        'user_id' => $employee->id,
+                        'user_id' => $employee->user_id,
+                        'shift_type' => $shiftMap[$employee->id],
                         'date' => $date->toDateString(),
                         'clock_in' => null,
                         'clock_out' => null,
                         'status' => 'not_started',
                     ]);
-                } else {
-                    // Generate skenario acak untuk hari-hari sebelumnya
-                    $rand = rand(1, 100);
-
-                    if ($rand <= 60) {
-                        // 70% Shift 8 jam (09:00-17:00)
-                        $clockIn = $date->copy()->setTime(9, 0);
-                        $clockOut = $date->copy()->setTime(17, 0);
-                        $status = 'finished';
-                    } elseif ($rand <= 90) {
-                        // 20% Shift 10 jam (08:00-18:00)
-                        $clockIn = $date->copy()->setTime(8, 0);
-                        $clockOut = $date->copy()->setTime(18, 0);
-                        $status = 'finished';
-                    } else {
-                        // 10% Cuti
-                        $clockIn = null;
-                        $clockOut = null;
-                        $status = 'leave';
-                    }
-
-                    Attendance::create([
-                        'user_id' => $employee->id,
-                        'date' => $date->toDateString(),
-                        'clock_in' => $clockIn?->toTimeString(),
-                        'clock_out' => $clockOut?->toTimeString(),
-                        'status' => $status,
-                    ]);
+                    continue;
                 }
+
+                // Tentukan shift secara acak untuk hari-hari sebelumnya
+                $shiftType = rand(0, 1) ? 'Pagi' : 'Siang';
+
+                // Cek kemungkinan cuti 15%
+                if (rand(1, 100) <= 10) {
+                    Attendance::create([
+                        'user_id' => $employee->user_id,
+                        'shift_type' => $shiftType,
+                        'date' => $date->toDateString(),
+                        'clock_in' => null,
+                        'clock_out' => null,
+                        'status' => 'leave',
+                    ]);
+                    continue;
+                } elseif (rand(1, 100) <= 5) {
+                    Attendance::create([
+                        'user_id' => $employee->user_id,
+                        'shift_type' => $shiftType,
+                        'date' => $date->toDateString(),
+                        'clock_in' => null,
+                        'clock_out' => null,
+                        'status' => 'sick',
+                    ]);
+                    continue;
+                }
+
+                // Tentukan waktu datang dengan probabilitas
+                $timeRand = rand(1, 100);
+                $timeMod = 0;
+                if ($timeRand <= 60) {
+                    $timeMod = 0; // Tepat waktu
+                } elseif ($timeRand <= 90) {
+                    $timeMod = 1; // Sedikit terlambat
+                } else {
+                    $timeMod = 2; // Terlambat
+                }
+
+                // Set waktu berdasarkan shift
+                if ($shiftType === 'Pagi') {
+                    $clockIn = match ($timeMod) {
+                        0 => '07:20:00',
+                        1 => '07:10:00',
+                        2 => '08:05:00',
+                    };
+                    $clockOut = '17:00:00';
+                } else {
+                    $clockIn = match ($timeMod) {
+                        0 => '12:20:00',
+                        1 => '12:10:00',
+                        2 => '13:05:00',
+                    };
+                    $clockOut = '20:00:00';
+                }
+
+                Attendance::create([
+                    'user_id' => $employee->user_id,
+                    'shift_type' => $shiftType,
+                    'date' => $date->toDateString(),
+                    'clock_in' => $clockIn,
+                    'clock_out' => $clockOut,
+                    'status' => 'finished',
+                ]);
             }
         }
     }

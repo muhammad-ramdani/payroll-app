@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { NavItem, NavReportItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { CalendarClock, ChartColumnBig, ClipboardCheck, DollarSign, IdCard, LayoutGrid, UserSearch } from 'lucide-react';
+import { ArrowRightLeft, CalendarClock, CalendarCog, ChartColumnBig, ClipboardCheck, ClipboardList, DollarSign, IdCard, LayoutGrid, RefreshCw, UserSearch } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
@@ -18,15 +18,39 @@ export function AppSidebar() {
             role: 'admin',
         },
         {
-            title: 'Absensi Karyawan',
+            title: 'Absensi',
             href: '/absensi',
             icon: ClipboardCheck,
+            role: 'karyawan',
+        },
+        {
+            title: 'Shift',
+            href: '/shift-karyawan',
+            icon: RefreshCw,
+            role: 'karyawan',
+        },
+        {
+            title: 'Permintaan Tukar Shift',
+            href: '/permintaan-tukar-shift',
+            icon: ArrowRightLeft,
             role: 'karyawan',
         },
         {
             title: 'Monitoring Absensi',
             href: '/monitoring-absensi',
             icon: UserSearch,
+            role: 'admin',
+        },
+        {
+            title: 'Aturan Absensi',
+            href: '/aturan-absensi',
+            icon: CalendarCog,
+            role: 'admin',
+        },
+        {
+            title: 'Shift',
+            href: '/admin-shift-karyawan',
+            icon: RefreshCw,
             role: 'admin',
         },
         {
@@ -48,11 +72,16 @@ export function AppSidebar() {
             role: 'karyawan',
         },
     ].filter((item) => {
-        // Tampilkan item jika tidak ada role atau jika role sesuai dengan pengguna
         return !item.role || item.role === auth.user.role;
     });
 
     const reportNavItems: NavReportItem[] = [
+        {
+            title: 'Rekap Absensi',
+            href: '/rekap-absensi',
+            icon: ClipboardList,
+            role: 'karyawan',
+        },
         {
             title: 'Laporan Absensi',
             href: '/laporan-absensi-karyawan',
@@ -72,7 +101,6 @@ export function AppSidebar() {
             role: 'admin',
         },
     ].filter((item) => {
-        // Tampilkan item jika tidak ada role atau jika role sesuai dengan pengguna
         return !item.role || item.role === auth.user.role;
     });
 

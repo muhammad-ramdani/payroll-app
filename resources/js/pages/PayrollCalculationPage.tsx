@@ -7,22 +7,20 @@ import Modal from '@/components/ui/modal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Payroll, type BreadcrumbItem } from '@/types';
+import { Payroll } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Perhitungan Penggajian', href: '/perhitungan-penggajian' }];
-
-const salaryStatusMapping: Record<Payroll['salary_status'], [string, string]> = {
+const salaryStatus = {
     uncalculated: ['Belum Dihitung', 'p-1.5 text-natural-500 bg-neutral-500/10'],
     unpaid: ['Belum Dibayar', 'p-1.5 text-amber-500 bg-amber-500/10'],
     paid_transfer: ['Sudah Dibayar Transfer', 'p-1.5 text-emerald-500 bg-emerald-500/10'],
     paid_cash: ['Sudah Dibayar Tunai', 'p-1.5 text-emerald-500 bg-emerald-500/10'],
 };
 
-const confirmationStatusMapping: Record<Payroll['confirmation_status'], [string, string]> = {
+const confirmationStatus = {
     blank: ['-', 'border-0 p-0 bg-transparent dark:text-white text-black'],
     pending_confirmation: ['Menunggu Konfirmasi', 'p-1.5 text-amber-500 bg-amber-500/10'],
     received: ['Gaji Sudah Diterima', 'p-1.5 text-emerald-500 bg-emerald-500/10'],
@@ -119,14 +117,14 @@ export default function PayrollCalculationPage({ payrolls }: Props) {
             {
                 header: 'Status',
                 cell: ({ row }) => {
-                    const [label, color] = salaryStatusMapping[row.original.salary_status];
+                    const [label, color] = salaryStatus[row.original.salary_status];
                     return <Badge className={color}>{label}</Badge>;
                 },
             },
             {
                 header: 'Konfirmasi Gaji',
                 cell: ({ row }) => {
-                    const [label, color] = confirmationStatusMapping[row.original.confirmation_status];
+                    const [label, color] = confirmationStatus[row.original.confirmation_status];
                     return <Badge className={color}>{label}</Badge>;
                 },
             },
@@ -166,6 +164,9 @@ export default function PayrollCalculationPage({ payrolls }: Props) {
                             >
                                 Tandai Sudah Dibayar
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open(`/penggajian/pdf/${row.original.id}`, '_blank')} hidden={row.original.confirmation_status !== 'received'}>
+                                Slip Gaji
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ),
@@ -193,7 +194,7 @@ export default function PayrollCalculationPage({ payrolls }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={[{ title: 'Perhitungan Penggajian', href: '/' }]}>
             <Head title="Perhitungan Penggajian" />
 
             <div className="overflow-x-auto p-4">

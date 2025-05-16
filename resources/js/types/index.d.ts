@@ -48,6 +48,24 @@ export interface User {
     updated_at: string;
 }
 
+export interface Shift {
+    id: number;
+    user: User;
+    shift_type: 'Pagi' | 'Siang';
+}
+
+export interface ShiftSwapPageProps {
+    receivedRequests: RawShiftSwap[];
+    // sentRequests: RawShiftSwap[];
+}
+
+export interface ShiftForEmployeePageProps {
+    userShifts: Shift[];
+    otherShifts: Shift[];
+    sentRequests: RawShiftSwap[];
+    globalPendingShiftIds: number[];
+}
+
 export interface Employee {
     id: string;
     user: User;
@@ -74,6 +92,12 @@ export interface Payroll {
     total_attendance_days: number;
     paid_holidays: number;
     total_overtime_days: number;
+    bonus_amount: number;
+    penalty_amount: number;
+    total_punctual_days: number;
+    total_late_days: number;
+    total_bonus: number;
+    total_penalty: number;
     basic_salary: number;
     daily_overtime_pay: number;
     total_basic_salary: number;
@@ -92,15 +116,20 @@ export interface Payroll {
 export interface Attendance {
     id: number;
     user: User;
+    shift_type: 'Pagi' | 'Siang';
     date: string;
     clock_in: string | null;
     clock_out: string | null;
-    status: 'not_started' | 'working' | 'finished' | 'leave';
+    status: 'not_started' | 'working' | 'finished' | 'leave' | 'sick';
 }
 
 export interface ModalProps {
     open: boolean;
     onClose: () => void;
+}
+
+export interface PersonalDataProps {
+    employee: Employee;
 }
 
 export interface EmployeeModalProps extends ModalProps {
@@ -121,4 +150,32 @@ export interface DeleteModalProps extends EmployeeModalProps {
 
 export interface PayrollModalProps extends ModalProps {
     payroll: Payroll | null;
+}
+
+export interface AttendanceBonusPenaltySetting {
+    id: number;
+    bonus_amount: number;
+    penalty_amount: number;
+}
+
+export interface AttendanceRule {
+    id: number;
+    shift_type: 'Pagi' | 'Siang';
+    punctual_end: string;
+    late_threshold: string;
+    attendance_bonus_penalty_setting: AttendanceBonusPenaltySetting;
+}
+
+export interface AttendanceRuleSettingPageProps {
+    attendanceRuleSettings: AttendanceRule[];
+}
+
+export interface ShopProfile {
+    shop_name: string;
+    address: string;
+    phone: string;
+}
+
+export interface ShopProfileProps {
+    shopProfile: ShopProfile;
 }

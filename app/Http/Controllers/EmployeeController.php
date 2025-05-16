@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Employee;
+use App\Models\Shift;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,7 +13,7 @@ class EmployeeController extends Controller
 {
     public function index()
     {
-        $employees = Employee::with('user')->get();
+        $employees = Employee::with('user', 'shift')->get();
 
         return Inertia::render('EmployeeDataPage', [
             'employees' => $employees,
@@ -40,6 +41,7 @@ class EmployeeController extends Controller
         if(!$forUpdate) {
             $rules['id'] = 'required|uuid|unique:employees,id';
             $rules['user.username'] = 'required|string|max:250|unique:users,username';
+            $rules['shift_type'] = 'required|in:Pagi,Siang';
         }
 
         return $rules;
@@ -64,6 +66,11 @@ class EmployeeController extends Controller
             'id' => $validated['id'],
             'user_id' => $user->id,
             ...$validated
+        ]);
+
+        Shift::create([
+            'user_id' => $user->id,
+            'shift_type' => $validated['shift_type']
         ]);
         
         return $this->handleResponse($request, $employee);

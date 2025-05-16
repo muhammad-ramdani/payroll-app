@@ -11,6 +11,10 @@ class AttendanceFactory extends Factory
     {
         return [
             'user_id' => Employee::factory(),
+            'shift_type' => function (array $attributes) {
+                $shift = Shift::where('user_id', $attributes['user_id'])->first();
+                return $shift ? $shift->shift_type : 'Pagi';
+            },
             'date' => now()->toDateString(),
             'clock_in' => null,
             'clock_out' => null,

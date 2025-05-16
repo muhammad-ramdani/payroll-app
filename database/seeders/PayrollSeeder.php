@@ -5,76 +5,187 @@ namespace Database\Seeders;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\Attendance;
+use App\Models\AttendanceRuleSetting;
+use App\Models\AttendanceBonusPenaltySetting;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 use DateTime;
 
 class PayrollSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        // Ambil semua data karyawan beserta relasi user
         $employees = Employee::with('user')->get();
+        
+        // Ambil setting bonus/penalty (diasumsikan hanya ada 1 record)
+        $bonusPenaltySettings = AttendanceBonusPenaltySetting::first();
 
+        // Loop untuk setiap karyawan
         foreach ($employees as $employee) {
-            // Membuat 12 payroll untuk 12 bulan terakhir
+            // Membuat 11 bulan terakhir + bulan berjalan (total 12 bulan)
             for ($i = 1; $i < 13; $i++) {
+                // Tanggal periode yang sedang diproses
                 $date = Carbon::now()->subMonths($i);
-                $isLastMonth = $i === 1;
+                $isLastMonth = $i === 1; // Bulan terakhir (belum dihitung)
 
                 // Data dasar payroll
                 $payrollData = [
                     'user_id' => $employee->user_id,
                     'period_month' => $date->month,
                     'period_year' => $date->year,
-                    'salary_status' => $isLastMonth ? 'uncalculated' : 'paid_cash',
-                    'confirmation_status' => $isLastMonth ? 'blank' : 'received',
+                    'salary_status' => $isLastMonth ? 'uncalculated' : 'paid_cash', // Status bulan terakhir
+                    'confirmation_status' => $isLastMonth ? 'blank' : 'received', // Konfirmasi bulan terakhir
                 ];
 
+                // Hanya hitung untuk bulan yang sudah lewat (bukan bulan terakhir)
                 if (!$isLastMonth) {
-                    // Hitung data presensi
-                    $attendances = Attendance::where('user_id', $employee->user_id)
-                        ->where('status', 'finished')
-                        ->whereMonth('date', $date->month)
-                        ->whereYear('date', $date->year)
-                        ->get();
+                    // Ambil data presensi bulan tersebut
+                    $attendances = Attendance::where('user_id', $employee->user_id)->whereMonth('date', $date->month)->whereYear('date', $date->year)->get();
 
-                    // Hitung hari kerja dan lembur
-                    $totalAttendanceDays = $attendances->count();
+                    /* 
+                     * [1] HITUNG KETEPATAN WAKTU & KETERLAMBATAN
+                     * Kelompokkan presensi berdasarkan shift_type dan hitung per shift
+                     */
+                    $shiftCounts = $attendances->groupBy('shift_type')->map(function ($group) {
+                        return collect([
+                            'punctual' => 0,   // Hari tepat waktu
+                            'late' => 0,        // Hari telat
+                            'total' => $group->where('status', 'finished')->count() // Total hari kerja
+                        ]);
+                    });
 
-                    $totalOvertimeDays = $attendances->filter(function ($attendance) {
-                        if (!$attendance->clock_in || !$attendance->clock_out) {
-                            return false;
+                    // Ambil semua aturan shift dari database
+                    $rules = AttendanceRuleSetting::with('attendanceBonusPenaltySetting')->get()->keyBy('shift_type');
+
+                    // Proses setiap presensi
+                    foreach ($attendances as $attendance) {
+                        // Hanya proses presensi yang completed
+                        if ($attendance->status === 'finished' && $attendance->clock_in) {
+                            // Ambil aturan untuk shift_type ini
+                            $rule = $rules->get($attendance->shift_type);
+                            if (!$rule) continue; // Skip jika tidak ada aturan
+
+                            // Konversi waktu ke timestamp
+                            $clockInTime = strtotime($attendance->clock_in);
+                            $punctualEnd = strtotime($rule->punctual_end);
+                            $lateThreshold = strtotime($rule->late_threshold);
+
+                            // Logika pengecekan
+                            $shiftCounts[$attendance->shift_type] = $shiftCounts[$attendance->shift_type]->map(function ($item, $key) use ($clockInTime, $punctualEnd, $lateThreshold) {
+                                if ($clockInTime <= $punctualEnd && $key === 'punctual') { // Tepat waktu
+                                    return $item + 1;
+                                } elseif ($clockInTime > $lateThreshold && $key === 'late') { // Telat
+                                    return $item + 1;
+                                }
+                                return $item;
+                            });
                         }
+                    }
 
-                        $start = new DateTime($attendance->date . ' ' . $attendance->clock_in);
-                        $end = new DateTime($attendance->date . ' ' . $attendance->clock_out);
+                    // Total semua shift
+                    $totalPunctualDays = $shiftCounts->sum->get('punctual');
+                    $totalLateDays = $shiftCounts->sum->get('late');
+                    $totalAttendanceDays = $shiftCounts->sum->get('total');
+
+                    /* 
+                     * [2] HITUNG LEMBUR 
+                     * Menggunakan perhitungan timestamp langsung tanpa Carbon
+                     */
+                    $totalOvertimeDays = $attendances->filter(function ($attendance) {
+                        // Skip jika tidak ada jam masuk/keluar
+                        if (!$attendance->clock_in || !$attendance->clock_out) return false;
                         
-                        return ($end->getTimestamp() - $start->getTimestamp()) / 3600 > 8.5;
+                        // Hitung durasi kerja dalam detik
+                        $start = strtotime($attendance->clock_in);
+                        $end = strtotime($attendance->clock_out);
+                        $duration = $end - $start;
+                        
+                        // 8.5 jam = 30600 detik (8.5 * 3600)
+                        return $duration > 30600;
                     })->count();
 
-                    // Hitung komponen gaji
                     $payrollData = array_merge($payrollData, [
+                        'bonus_amount' => $bonusPenaltySettings->bonus_amount, // Ambil dari setting
+                        'penalty_amount' => $bonusPenaltySettings->penalty_amount, // Ambil dari setting
+                    ]);
+
+                    /* 
+                     * [3] HITUNG KOMPONEN GAJI 
+                     */
+                    // Gaji pokok
+                    $basicSalary = $employee->basic_salary;
+                    // Upah lembur per hari
+                    $overtimePay = $employee->daily_overtime_pay;
+                    
+                    // Total gaji pokok = (hari kerja + libur berbayar) * gaji pokok
+                    $totalBasic = ($totalAttendanceDays + $employee->paid_holidays) * $basicSalary;
+                    
+                    // Total lembur = hari lembur * upah lembur
+                    $totalOvertime = $totalOvertimeDays * $overtimePay;
+                    
+                    // Total bonus = hari tepat waktu * bonus per hari
+                    $totalBonus = $totalPunctualDays * $bonusPenaltySettings->bonus_amount;
+                    
+                    // Total potongan = hari telat * penalty per hari
+                    $totalPenalty = $totalLateDays * $bonusPenaltySettings->penalty_amount;
+                    
+                    // Gaji kotor = total pokok + lembur + bonus - potongan
+                    $grossSalary = $totalBasic + $totalOvertime + $totalBonus - $totalPenalty;
+                    
+                    /* 
+                     * [4] HITUNG POTONGAN 
+                     */
+                    // Total persentase potongan
+                    $deductionPercent = $employee->bpjs_health + $employee->bpjs_employment + $employee->income_tax;
+
+                    // Nominal potongan
+                    $totalDeductions = round(($deductionPercent / 100) * $grossSalary);
+                    
+                    // Gabungkan semua data ke array
+                    $payrollData = array_merge($payrollData, [
+                        // Data kehadiran
                         'total_attendance_days' => $totalAttendanceDays,
                         'paid_holidays' => $employee->paid_holidays,
+                        
+                        // Data lembur
                         'total_overtime_days' => $totalOvertimeDays,
-                        'basic_salary' => $employee->basic_salary,
-                        'daily_overtime_pay' => $employee->daily_overtime_pay,
-                        'total_basic_salary' => ($totalAttendanceDays + $employee->paid_holidays) * $employee->basic_salary,
-                        'total_overtime_pay' => $totalOvertimeDays * $employee->daily_overtime_pay,
-                        'gross_salary' => ($totalAttendanceDays + $employee->paid_holidays) * $employee->basic_salary + ($totalOvertimeDays * $employee->daily_overtime_pay),
+                        
+                        // Data tepat waktu
+                        'total_punctual_days' => $totalPunctualDays,
+                        'total_late_days' => $totalLateDays,
+                        
+                        // Komponen penghasilan
+                        'total_bonus' => $totalBonus,
+                        'total_penalty' => $totalPenalty,
+                        'basic_salary' => $basicSalary,
+                        'daily_overtime_pay' => $overtimePay,
+                        'total_basic_salary' => $totalBasic,
+                        'total_overtime_pay' => $totalOvertime,
+                        'gross_salary' => $grossSalary,
+                        
+                        // Data potongan
                         'bpjs_health_percent' => $employee->bpjs_health,
                         'bpjs_employment_percent' => $employee->bpjs_employment,
                         'income_tax_percent' => $employee->income_tax,
-                        'total_deduction_percent' => $employee->bpjs_health + $employee->bpjs_employment + $employee->income_tax,
-                        'total_deductions' => round((($employee->bpjs_health + $employee->bpjs_employment + $employee->income_tax) / 100) * (($totalAttendanceDays + $employee->paid_holidays) * $employee->basic_salary + ($totalOvertimeDays * $employee->daily_overtime_pay))),
-                        'net_salary' => (($totalAttendanceDays + $employee->paid_holidays) * $employee->basic_salary + ($totalOvertimeDays * $employee->daily_overtime_pay)) - round((($employee->bpjs_health + $employee->bpjs_employment + $employee->income_tax) / 100 * (($totalAttendanceDays + $employee->paid_holidays) * $employee->basic_salary + ($totalOvertimeDays * $employee->daily_overtime_pay))))
+                        'total_deduction_percent' => $deductionPercent,
+                        'total_deductions' => $totalDeductions,
+                        
+                        // Gaji bersih
+                        'net_salary' => $grossSalary - $totalDeductions
                     ]);
                 }
 
-                Payroll::create($payrollData);
+                // Simpan atau update data payroll
+                Payroll::updateOrCreate(
+                    [
+                        // Cari berdasarkan kombinasi unik
+                        'user_id' => $employee->user_id,
+                        'period_month' => $date->month,
+                        'period_year' => $date->year
+                    ],
+                    $payrollData // Data yang akan diupdate/dicreate
+                );
             }
         }
     }

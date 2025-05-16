@@ -1,10 +1,10 @@
 // Imports: Dikelompokkan berdasarkan sumber (Eksternal, Komponen, Utilitas, dll)
 // -----------------------------------------------------------------------------
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { CalendarIcon, LoaderCircle, RotateCw } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 // Komponen UI Kustom
@@ -16,17 +16,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 
 // Tipe Data dan Konstanta
-import { Attendance, type BreadcrumbItem } from '@/types';
+import { Attendance } from '@/types';
 
-// Konfigurasi Konstanta
-// -----------------------------------------------------------------------------
-const PAGE_BREADCRUMBS: BreadcrumbItem[] = [{ title: 'Monitoring Absensi', href: '/monitoring-absensi' }];
-
-const ATTENDANCE_STATUS_CONFIG: Record<Attendance['status'], [string, string]> = {
-    not_started: ['Belum Hadir', 'p-1.5 text-amber-500 bg-amber-500/10'],
-    working: ['Sedang Bekerja', 'p-1.5 text-emerald-500 bg-emerald-500/10'],
-    finished: ['Sudah Pulang', 'p-1.5 text-blue-500 bg-blue-500/10'],
-    leave: ['Tidak Masuk', 'p-1.5 text-rose-500 bg-rose-500/10'],
+const attendanceStatus = {
+    not_started: ['Belum Hadir', 'text-amber-500 bg-amber-500/10'],
+    working: ['Sedang Bekerja', 'text-emerald-500 bg-emerald-500/10'],
+    finished: ['Sudah Pulang', 'text-blue-500 bg-blue-500/10'],
+    leave: ['Libur Cuti', 'text-rose-500 bg-rose-500/10'],
+    sick: ['Libur Sakit', 'text-fuchsia-500 bg-fuchsia-500/10'],
 };
 
 // Komponen Utilitas
@@ -36,7 +33,7 @@ const ATTENDANCE_STATUS_CONFIG: Record<Attendance['status'], [string, string]> =
  * @param status - Status kehadiran dari Attendance
  */
 const AttendanceStatusBadge = ({ status }: { status: Attendance['status'] }) => {
-    const [label, className] = ATTENDANCE_STATUS_CONFIG[status];
+    const [label, className] = attendanceStatus[status];
     return <Badge className={className}>{label}</Badge>;
 };
 
@@ -74,7 +71,7 @@ const calculateWorkingDuration = (clockInTime?: string | null, clockOutTime?: st
 
 // Komponen Utama
 // -----------------------------------------------------------------------------
-export default function MonitoringAttendancePage() {
+export default function AttendanceMonitoringPage() {
     // State Management
     // -------------------------------------------------------------------------
     const {
@@ -82,7 +79,6 @@ export default function MonitoringAttendancePage() {
     } = usePage<{ monitoring_attendances: Attendance[] }>();
     const [currentTimestamp, setCurrentTimestamp] = useState(Date.now());
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-    const [isReloading, setIsReloading] = useState(false);
 
     // Data Processing
     // -------------------------------------------------------------------------
@@ -114,6 +110,10 @@ export default function MonitoringAttendancePage() {
     const tableColumns = useMemo<ColumnDef<Attendance>[]>(
         () => [
             { header: 'Nama', cell: ({ row }) => <span>{row.original.user.name}</span> },
+            {
+                header: 'Shift',
+                cell: ({ row }) => <span className={`${row.original.shift_type === 'Pagi' ? 'text-blue-500' : 'text-yellow-500'}`}>{row.original.shift_type}</span>,
+            },
             { header: 'Jam Masuk', cell: ({ row }) => <span>{row.original.clock_in ?? '-'}</span> },
             { header: 'Jam Pulang', cell: ({ row }) => <span>{row.original.clock_out ?? '-'}</span> },
             {
@@ -137,14 +137,8 @@ export default function MonitoringAttendancePage() {
     useEffect(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
-        if (availableDates.has(today.getTime())) {
-            setSelectedDate(today);
-        } else if (availableDates.size > 0) {
-            const firstDate = new Date(Math.min(...Array.from(availableDates)));
-            setSelectedDate(firstDate);
-        }
-    }, [availableDates]);
+        setSelectedDate(today);
+    }, []);
 
     // Update waktu setiap detik untuk durasi real-time
     useEffect(() => {
@@ -152,19 +146,10 @@ export default function MonitoringAttendancePage() {
         return () => clearInterval(intervalId);
     }, []);
 
-    // Handler reload data
-    const handleReload = () => {
-        setIsReloading(true);
-        router.reload({
-            only: ['monitoring_attendances'],
-            onFinish: () => setIsReloading(false),
-        });
-    };
-
     // UI Rendering
     // -------------------------------------------------------------------------
     return (
-        <AppLayout breadcrumbs={PAGE_BREADCRUMBS}>
+        <AppLayout breadcrumbs={[{ title: 'Monitoring Absensi', href: '/' }]}>
             <Head title="Absensi Karyawan" />
 
             {/* Konten Utama */}
@@ -175,17 +160,22 @@ export default function MonitoringAttendancePage() {
                         <PopoverTrigger asChild>
                             <Button variant="outline" className="mr-auto w-auto font-normal">
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {(selectedDate && format(selectedDate, 'EEEE, dd MMMM yyyy', { locale: id }))}
+                                {selectedDate && format(selectedDate, 'EEEE, dd MMMM yyyy', { locale: id })}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} disabled={(date) => !availableDates.has(new Date(date).setHours(0, 0, 0, 0))} />
+                            <Calendar
+                                mode="single"
+                                selected={selectedDate}
+                                onSelect={setSelectedDate}
+                                disabled={(date) => {
+                                    const time = new Date(date).setHours(0, 0, 0, 0);
+                                    const isToday = time === new Date().setHours(0, 0, 0, 0);
+                                    return !isToday && !availableDates.has(time);
+                                }}
+                            />
                         </PopoverContent>
                     </Popover>
-
-                    <Button variant="outline" size="icon" className="ml-4" onClick={handleReload} disabled={isReloading}>
-                        {isReloading ? <LoaderCircle className="animate-spin" /> : <RotateCw />}
-                    </Button>
                 </div>
 
                 {/* Tabel Data Kehadiran */}
@@ -202,13 +192,21 @@ export default function MonitoringAttendancePage() {
                         </TableHeader>
 
                         <TableBody>
-                            {attendanceTable.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                                    ))}
+                            {attendanceTable.getRowModel().rows.length > 0 ? (
+                                attendanceTable.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={tableColumns.length} className="text-muted-foreground h-24 text-center">
+                                        Absensi baru akan tersedia pukul 06:30 pagi.
+                                    </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 </div>

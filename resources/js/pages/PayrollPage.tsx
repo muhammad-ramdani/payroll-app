@@ -1,68 +1,37 @@
-import DetailModal from '@/components/payroll-calculation-components/DetailModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import Modal from '@/components/ui/modal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Payroll, type BreadcrumbItem } from '@/types';
+import { Payroll } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Penggajian', href: '/' }];
-
-const salaryStatusMapping: Record<Payroll['salary_status'], [string, string]> = {
-    uncalculated: ['Belum Dihitung', 'p-1.5 text-natural-500 bg-neutral-500/10'],
-    unpaid: ['Belum Dibayar', 'p-1.5 text-amber-500 bg-amber-500/10'],
-    paid_transfer: ['Sudah Dibayar Transfer', 'p-1.5 text-emerald-500 bg-emerald-500/10'],
-    paid_cash: ['Sudah Dibayar Tunai', 'p-1.5 text-emerald-500 bg-emerald-500/10'],
+const salaryStatus = {
+    uncalculated: ['Belum Dihitung', 'bg-neutral-500/10 text-natural-500'],
+    unpaid: ['Belum Dibayar', 'bg-amber-500/10 text-amber-500'],
+    paid_transfer: ['Sudah Dibayar Transfer', 'bg-emerald-500/10 text-emerald-500'],
+    paid_cash: ['Sudah Dibayar Tunai', 'bg-emerald-500/10 text-emerald-500'],
 };
 
-const confirmationStatusMapping: Record<Payroll['confirmation_status'], [string, string]> = {
-    blank: ['-', 'border-0 p-0 bg-transparent dark:text-white text-black'],
-    pending_confirmation: ['Menunggu Konfirmasi', 'p-1.5 text-amber-500 bg-amber-500/10'],
-    received: ['Gaji Sudah Diterima', 'p-1.5 text-emerald-500 bg-emerald-500/10'],
+const confirmationStatus = {
+    blank: ['-', 'bg-transparent dark:text-white text-black'],
+    pending_confirmation: ['Menunggu Konfirmasi', 'bg-amber-500/10 text-amber-500'],
+    received: ['Gaji Sudah Diterima', 'bg-emerald-500/10 text-emerald-500'],
 };
 
-interface Props {
-    payrolls: Payroll[];
-}
-
-export default function PayrollPage({ payrolls }: Props) {
-    const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
     const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-    const initialSelection = useMemo(() => {
-        const currentDate = new Date();
-        let targetYear = currentDate.getFullYear();
+    const uniqueYears = [...new Set(payrolls.map((p) => p.period_year))].sort((a, b) => b - a);
+    const [selectedYear, setSelectedYear] = useState(Math.max(...uniqueYears));
 
-        const currentYearExists = payrolls.some((p) => p.period_year === targetYear);
-
-        if (!currentYearExists) {
-            const sortedYears = [...new Set(payrolls.map((p) => p.period_year))].sort((a, b) => b - a);
-            if (sortedYears.length > 0) {
-                targetYear = sortedYears[0];
-            }
-        }
-
-        return { year: targetYear };
-    }, [payrolls]);
-
-    const [selectedYear, setSelectedYear] = useState<number>(initialSelection.year);
-
-    const uniqueYears = useMemo(() => {
-        return [...new Set(payrolls.map((p) => p.period_year))].sort((a, b) => b - a);
-    }, [payrolls]);
-
-    useEffect(() => {
-        if (uniqueYears.length > 0 && !uniqueYears.includes(selectedYear)) {
-            setSelectedYear(Math.max(...uniqueYears));
-        }
-    }, [uniqueYears, selectedYear]);
-
-    const filteredPayrolls = useMemo(() => payrolls.filter((p) => p.period_year === selectedYear), [payrolls, selectedYear]);
+    const filteredData = useMemo(() => payrolls.filter((p) => p.period_year === selectedYear), [payrolls, selectedYear]);
 
     const columns = useMemo<ColumnDef<Payroll>[]>(
         () => [
@@ -77,81 +46,82 @@ export default function PayrollPage({ payrolls }: Props) {
             {
                 header: 'Status',
                 cell: ({ row }) => {
-                    const [label, color] = salaryStatusMapping[row.original.salary_status];
-                    return <Badge className={color}>{label}</Badge>;
+                    const [label, style] = salaryStatus[row.original.salary_status];
+                    return <Badge className={style}>{label}</Badge>;
                 },
             },
             {
-                header: 'Konfirmasi Gaji',
+                header: 'Konfirmasi',
                 cell: ({ row }) => {
-                    const [label, color] = confirmationStatusMapping[row.original.confirmation_status];
-                    return <Badge className={color}>{label}</Badge>;
+                    const [label, style] = confirmationStatus[row.original.confirmation_status];
+                    return <Badge className={style}>{label}</Badge>;
                 },
             },
             {
                 header: 'Aksi',
-                cell: ({ row }) => (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild hidden={row.original.confirmation_status === 'blank'}>
-                            <Button variant="ghost" size="icon">
-                                <MoreHorizontal />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                onClick={() => {
-                                    setSelectedPayroll(row.original);
-                                    setIsDetailDialogOpen(true);
-                                }}
-                                hidden={row.original.confirmation_status === 'blank'}
-                            >
-                                Lihat Detail
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleConfirmation(row.original.id)} hidden={row.original.confirmation_status !== 'pending_confirmation'}>
-                                Tandai Gaji Sudah Diterima
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                ),
+                cell: ({ row }) => {
+                    const { confirmation_status, id } = row.original;
+                    const showActions = confirmation_status !== 'blank';
+
+                    return (
+                        showActions && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <MoreHorizontal />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => showDetails(row.original)}>Lihat Detail</DropdownMenuItem>
+                                    {confirmation_status === 'pending_confirmation' && <DropdownMenuItem onClick={() => confirmSalary(id)}>Tandai Diterima</DropdownMenuItem>}
+                                    <DropdownMenuItem onClick={() => window.open(`/penggajian/pdf/${id}`, '_blank')} hidden={row.original.confirmation_status !== 'received'}>
+                                        Slip Gaji
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )
+                    );
+                },
             },
         ],
         [],
     );
 
-    const handleConfirmation = (id: number) => {
+    const showDetails = (payroll: Payroll) => {
+        setSelectedPayroll(payroll);
+        setIsDetailOpen(true);
+    };
+
+    const confirmSalary = (id: number) => {
         router.patch(`/penggajian/confirmation/${id}`, {
             confirmation_status: 'received',
         });
     };
 
     const table = useReactTable({
-        data: filteredPayrolls,
+        data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModel(),
     });
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={[{ title: 'Penggajian', href: '/' }]}>
             <Head title="Penggajian" />
-            <div className="overflow-x-auto p-4">
-                <div className="mb-4 flex gap-4">
-                    <div className="w-auto">
-                        <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {uniqueYears.map((year) => (
-                                    <SelectItem key={year} value={year.toString()}>
-                                        {year}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
+            <div className="space-y-4 pt-4 px-4">
+                <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(Number(v))}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {uniqueYears.map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                                {year}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
                 <div className="rounded-md border">
                     <Table>
@@ -177,7 +147,168 @@ export default function PayrollPage({ payrolls }: Props) {
                 </div>
             </div>
 
-            <DetailModal open={isDetailDialogOpen} onClose={() => setIsDetailDialogOpen(false)} payroll={selectedPayroll} />
+            <div className="text-muted-foreground mx-4 mt-8 mb-4 space-y-2">
+                <p className="text-sm font-semibold">Catatan:</p>
+                <ul className="ml-5 list-disc space-y-1 text-sm">
+                    <li>Anda baru bisa melihat detail gaji jika statusnya sudah 'Sudah Dibayar'.</li>
+                    <li>Anda baru bisa mencetak slip gaji setelah mengonfirmasi 'Gaji Sudah Diterima'.</li>
+                </ul>
+            </div>
+
+            <Modal open={isDetailOpen} onClose={() => setIsDetailOpen(false)} title="Detail Data Gaji">
+                {selectedPayroll && (
+                    <Table>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell>Bulan & Tahun</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell>
+                                    {new Date(selectedPayroll.period_year, selectedPayroll.period_month - 1).toLocaleString('id-ID', { month: 'long' })}, {selectedPayroll.period_year}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Total Gaji Pokok</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell className="text-sm/7">
+                                    <span className="text-red-500">(</span>
+                                    Total Kehadiran
+                                    <span className="text-yellow-500"> + </span>
+                                    Jatah Libur
+                                    <span className="text-red-500">)</span>
+                                    <span className="text-yellow-500"> × </span>
+                                    Gaji Pokok Harian
+                                    <br />
+                                    <span className="text-red-500">(</span>
+                                    {selectedPayroll.total_attendance_days}
+                                    <span className="text-yellow-500"> + </span>
+                                    {selectedPayroll.paid_holidays}
+                                    <span className="text-red-500">)</span>
+                                    <span className="text-yellow-500"> × </span>
+                                    Rp {selectedPayroll.basic_salary.toLocaleString('id-ID')}
+                                    <br />
+                                    <span className="text-blue-500">Rp {selectedPayroll.total_basic_salary.toLocaleString('id-ID')}</span>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Total Gaji Lembur</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell className="text-sm/7">
+                                    Total Lembur
+                                    <span className="text-yellow-500"> × </span>
+                                    Gaji Lembur Harian
+                                    <br />
+                                    {selectedPayroll.total_overtime_days}
+                                    <span className="text-yellow-500"> × </span>
+                                    Rp {selectedPayroll.daily_overtime_pay.toLocaleString('id-ID')}
+                                    <br />
+                                    <span className="text-blue-500">Rp {selectedPayroll.total_overtime_pay.toLocaleString('id-ID')}</span>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Total Bonus Tepat Waktu</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell className="text-sm/7">
+                                    Total Tepat Waktu
+                                    <span className="text-yellow-500"> × </span>
+                                    Bonus Tepat Waktu Harian
+                                    <br />
+                                    {selectedPayroll.total_punctual_days}
+                                    <span className="text-yellow-500"> × </span>
+                                    Rp {selectedPayroll.bonus_amount.toLocaleString('id-ID')}
+                                    <br />
+                                    <span className="text-blue-500">Rp {selectedPayroll.total_bonus.toLocaleString('id-ID')}</span>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Total Potongan Telat</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell className="text-sm/7">
+                                    Total Telat
+                                    <span className="text-yellow-500"> × </span>
+                                    Potongan Telat Harian
+                                    <br />
+                                    {selectedPayroll.total_late_days}
+                                    <span className="text-yellow-500"> × </span>
+                                    Rp {selectedPayroll.penalty_amount.toLocaleString('id-ID')}
+                                    <br />
+                                    <span className="text-blue-500">Rp {selectedPayroll.total_penalty.toLocaleString('id-ID')}</span>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Total Gaji Kotor</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell>
+                                    Total Gaji Pokok
+                                    <span className="text-yellow-500"> + </span>
+                                    Total Gaji Lembur
+                                    <span className="text-yellow-500"> + </span>
+                                    Total Bonus Tepat Waktu
+                                    <span className="text-yellow-500"> - </span>
+                                    Total Potongan Telat
+                                    <br />
+                                    Rp {selectedPayroll.total_basic_salary.toLocaleString('id-ID')}
+                                    <span className="text-yellow-500"> + </span>
+                                    Rp {selectedPayroll.total_overtime_pay.toLocaleString('id-ID')}
+                                    <span className="text-yellow-500"> + </span>
+                                    Rp {selectedPayroll.total_bonus.toLocaleString('id-ID')}
+                                    <span className="text-yellow-500"> - </span>
+                                    Rp {selectedPayroll.total_penalty.toLocaleString('id-ID')}
+                                    <br />
+                                    <span className="text-blue-500">Rp {selectedPayroll.gross_salary.toLocaleString('id-ID')}</span>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Total Potongan</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell className="text-sm/7">
+                                    BPJS Kesehatan
+                                    <span className="text-yellow-500"> + </span>
+                                    BPJS Ketenagakerjaan
+                                    <span className="text-yellow-500"> + </span>
+                                    Pajak Penghasilan
+                                    <br />
+                                    {selectedPayroll.bpjs_health_percent} %<span className="text-yellow-500"> + </span>
+                                    {selectedPayroll.bpjs_employment_percent} %<span className="text-yellow-500"> + </span>
+                                    {selectedPayroll.income_tax_percent} %
+                                    <br />
+                                    {selectedPayroll.total_deduction_percent} %
+                                    <br />
+                                    <span className="text-blue-500">Rp {selectedPayroll.total_deductions.toLocaleString('id-ID')}</span>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Total Gaji Bersih</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell>
+                                    Total Gaji Kotor
+                                    <span className="text-yellow-500"> - </span>
+                                    Total Potongan Dalam Bentuk Rupiah
+                                    <br />
+                                    Rp {selectedPayroll.gross_salary.toLocaleString('id-ID')}
+                                    <span className="text-yellow-500"> - </span>
+                                    Rp {selectedPayroll.total_deductions.toLocaleString('id-ID')}
+                                    <br />
+                                    <span className="text-blue-500">Rp {selectedPayroll.net_salary.toLocaleString('id-ID')}</span>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Status</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell>
+                                    <Badge className={salaryStatus[selectedPayroll.salary_status][1]}>{salaryStatus[selectedPayroll.salary_status][0]}</Badge>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Konfirmasi Gaji</TableCell>
+                                <TableCell>:</TableCell>
+                                <TableCell>
+                                    <Badge className={confirmationStatus[selectedPayroll.confirmation_status][1]}>{confirmationStatus[selectedPayroll.confirmation_status][0]}</Badge>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                )}
+            </Modal>
         </AppLayout>
     );
 }

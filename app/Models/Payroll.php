@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Payroll extends Model
 {
     use HasFactory;
+    use HasUuids;
 
     protected $fillable = [
         'user_id',
@@ -17,6 +19,12 @@ class Payroll extends Model
         'total_attendance_days',
         'paid_holidays',
         'total_overtime_days',
+        'total_punctual_days',
+        'total_late_days',
+        'bonus_amount',
+        'penalty_amount',
+        'total_bonus',
+        'total_penalty',
         'basic_salary',
         'daily_overtime_pay',
         'total_basic_salary',
@@ -35,6 +43,11 @@ class Payroll extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function attendancerulesetting()
+    {
+        return $this->belongsTo(AttendanceRuleSetting::class);
     }
 
     public static function existsForPeriod($userId, $month, $year): bool
