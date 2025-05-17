@@ -38,42 +38,19 @@ class AttendanceController extends Controller
     public function update(Request $request, Attendance $attendance)
     {
         $validated = $request->validate([
-            'clock_in'  => 'nullable|date_format:H:i:s',
-            'clock_out' => 'nullable|date_format:H:i:s',
-            'status'    => 'required|in:not_started,working,finished,leave,sick',
+            'action' => 'required|in:clock_in,clock_out,leave,sick',
         ]);
 
-        // Ambil nilai existing
-        $clockIn = $attendance->clock_in;
-        $clockOut = $attendance->clock_out;
+        if ($attendance->status === 'leave' || $attendance->status === 'sick') return back();
 
-        // Handle clock_in hanya jika ada dalam request
-        if ($request->has('clock_in')) {
-            // Validasi jika mencoba mengubah clock_in yang sudah ada ke null
-            if ($attendance->clock_in && $validated['clock_in'] === null) {
-                throw ValidationException::withMessages([
-                    'clock_in' => 'Clock in cannot be cleared once set'
-                ]);
-            }
-            $clockIn = $validated['clock_in'];
+        $action = $validated['action'];
+
+        if ($action === 'clock_in' && !$attendance->clock_in) {
+            $attendance->update(['clock_in' => now()->format('H:i:s'), 'status' => 'working']);
+        } elseif ($action === 'clock_out' && $attendance->clock_in && !$attendance->clock_out) {
+            $attendance->update(['clock_out' => now()->format('H:i:s'), 'status' => 'finished']);
+        } elseif (($action === 'leave' || $action === 'sick') && $attendance->status === 'not_started') {
+            $attendance->update(['status' => $action]);
         }
-
-        // Handle clock_out hanya jika ada dalam request
-        if ($request->has('clock_out')) {
-            $clockOut = $validated['clock_out'];
-        }
-
-        // Validasi clock_out harus setelah clock_in
-        if ($clockOut && !$clockIn) {
-            throw ValidationException::withMessages([
-                'clock_out' => 'Clock in must be filled first'
-            ]);
-        }
-
-        $attendance->update([
-            'clock_in' => $clockIn,
-            'clock_out' => $clockOut,
-            'status' => $validated['status']
-        ]);
     }
 }

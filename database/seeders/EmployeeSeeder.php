@@ -29,7 +29,7 @@ class EmployeeSeeder extends Seeder
             Employee::factory()->create([
                 'id'           => $uuid,
                 'user_id'     => $uuid,
-                'account_name' => $name, // Set account_name dari nama user
+                'account_name' => $name,
             ]);
         }
     }

@@ -1,6 +1,7 @@
-// AttendanceRecapPage.tsx
+// AttendancePage.tsx
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { calculateDistance, getCurrentPosition } from '@/utils/geolocation';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { ClockArrowDown, ClockArrowUp } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -12,65 +13,52 @@ import AppLayout from '@/layouts/app-layout';
 // Tipe Data dan Konstanta
 import { Attendance, AttendanceBonusPenaltySetting, AttendanceRule } from '@/types';
 
-const formatTimeToHHMM = (timeString: string) => {
-    return timeString.split(':').slice(0, 2).join(':');
-};
-
-const attendanceStatus = {
-    not_started: ['Belum Hadir', 'text-amber-500 bg-amber-500/10'],
-    working: ['Sedang Bekerja', 'text-emerald-500 bg-emerald-500/10'],
-    finished: ['Sudah Pulang', 'text-blue-500 bg-blue-500/10'],
-    leave: ['Libur Cuti', 'text-rose-500 bg-rose-500/10'],
-    sick: ['Libur Sakit', 'text-fuchsia-500 bg-fuchsia-500/10'],
-};
-
-const formatTimeToHHMMSS = (timestampMs: number) => new Date(timestampMs).toLocaleTimeString('en-GB');
-const formatLongDate = (date: Date) => {
-    return new Intl.DateTimeFormat('id-ID', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    }).format(date);
-};
-
-const calculateWorkingDuration = (clockInTime?: string | null, clockOutTime?: string | null, currentTimestamp = Date.now()): string => {
+const calculateWorkingDuration = (clockInTime?: string | null, clockOutTime?: string | null, now = Date.now()): string => {
     if (!clockInTime) return '-';
 
-    const parseTimeStringToDate = (time: string) => {
-        const [hours, minutes, seconds] = time.split(':').map(Number);
-        const date = new Date(currentTimestamp);
-        date.setHours(hours, minutes, seconds);
+    const parse = (timeString: string) => {
+        const [hour, minute, second = '0'] = timeString.split(':');
+        const date = new Date(now);
+        date.setHours(+hour, +minute, +second);
         return date;
     };
 
-    const startTime = parseTimeStringToDate(clockInTime);
-    const endTime = clockOutTime ? parseTimeStringToDate(clockOutTime) : new Date(currentTimestamp);
+    const start = parse(clockInTime);
+    const end = clockOutTime ? parse(clockOutTime) : new Date();
 
-    const durationInMilliseconds = endTime.getTime() - startTime.getTime();
-    const padWithZero = (number: number) => String(number).padStart(2, '0');
-    const hours = Math.floor(durationInMilliseconds / 3_600_000);
-    const minutes = Math.floor((durationInMilliseconds % 3_600_000) / 60_000);
-    const seconds = Math.floor((durationInMilliseconds % 60_000) / 1_000);
+    const ms = Math.max(0, end.getTime() - start.getTime());
+    const hh = String(Math.floor(ms / 3600000)).padStart(2, '0');
+    const mm = String(Math.floor((ms % 3600000) / 60000)).padStart(2, '0');
+    const ss = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
 
-    return `${padWithZero(hours)}:${padWithZero(minutes)}:${padWithZero(seconds)}`;
+    return `${hh}:${mm}:${ss}`;
 };
 
 const AttendanceStatusBadge = ({ status }: { status: Attendance['status'] }) => {
-    const [label, className] = attendanceStatus[status];
+    const [label, className] = {
+        not_started: ['Belum Hadir', 'text-amber-500 bg-amber-500/10'],
+        working: ['Sedang Bekerja', 'text-emerald-500 bg-emerald-500/10'],
+        finished: ['Sudah Pulang', 'text-blue-500 bg-blue-500/10'],
+        leave: ['Libur Cuti', 'text-rose-500 bg-rose-500/10'],
+        sick: ['Libur Sakit', 'text-fuchsia-500 bg-fuchsia-500/10'],
+    }[status];
+
     return <Badge className={className}>{label}</Badge>;
 };
 
-export default function AttendanceRecapPage() {
-    const {
-        props: { attendances, attendanceRules, bonusPenaltySettings },
-    } = usePage<{
-        attendances: Attendance[];
-        attendanceRules: Record<number, AttendanceRule>;
-        bonusPenaltySettings: AttendanceBonusPenaltySetting;
-    }>();
+export default function AttendancePage({
+    attendances,
+    attendanceRules,
+    bonusPenaltySettings,
+}: {
+    attendances: Attendance[];
+    attendanceRules: Record<number, AttendanceRule>;
+    bonusPenaltySettings: AttendanceBonusPenaltySetting;
+}) {
     const [attendanceRecords, setAttendanceRecords] = useState(attendances);
     const [currentTimestamp, setCurrentTimestamp] = useState(Date.now());
+    const [showLocationAlert, setShowLocationAlert] = useState(false);
+    const [storesList, setStoresList] = useState<Array<{ name: string; radius: number }>>([]);
 
     useEffect(() => {
         const intervalId = setInterval(() => setCurrentTimestamp(Date.now()), 1000);
@@ -81,47 +69,37 @@ export default function AttendanceRecapPage() {
         setAttendanceRecords(attendances);
     }, [attendances]);
 
-    const handleUpdateAttendance = useCallback(async (id: number, data: { clock_in?: string; clock_out?: string; status: Attendance['status'] }) => {
-        setAttendanceRecords((prev) => prev.map((record) => (record.id === id ? { ...record, ...data } : record)));
-        await router.patch(route('absensi.update', id), data);
+    const handleUpdateAttendance = useCallback((id: number, action: 'clock_in' | 'clock_out' | 'leave' | 'sick') => {
+        router.patch(`/absensi/${id}`, { action });
     }, []);
 
     const handleAttendanceAction = useCallback(
         async (actionType: 'clock_in' | 'clock_out', recordId: number) => {
-            try {
-                const { latitude, longitude } = await getCurrentPosition();
-                const stores = [];
-                let storeCount = 1;
+            const { latitude, longitude } = await getCurrentPosition();
 
-                while (import.meta.env[`VITE_STORE_${storeCount}_LAT`]) {
-                    stores.push({
-                        name: import.meta.env[`VITE_STORE_${storeCount}_NAME`] || `Store ${storeCount}`,
-                        lat: parseFloat(import.meta.env[`VITE_STORE_${storeCount}_LAT`]),
-                        lng: parseFloat(import.meta.env[`VITE_STORE_${storeCount}_LNG`]),
-                        radius: parseFloat(import.meta.env[`VITE_STORE_${storeCount}_RADIUS`]) || 100,
-                    });
-                    storeCount++;
-                }
+            const stores = [];
+            for (let i = 1; i <= 100; i++) {
+                const lat = import.meta.env[`VITE_STORE_${i}_LAT`];
+                const lng = import.meta.env[`VITE_STORE_${i}_LNG`];
+                if (!lat || !lng) break;
 
-                const isWithinRadius = stores.some((store) => {
-                    const distance = calculateDistance(latitude, longitude, store.lat, store.lng);
-                    return distance <= store.radius;
+                stores.push({
+                    name: import.meta.env[`VITE_STORE_${i}_NAME`] || `Store ${i}`,
+                    lat: parseFloat(lat),
+                    lng: parseFloat(lng),
+                    radius: parseFloat(import.meta.env[`VITE_STORE_${i}_RADIUS`]) || 100,
                 });
-
-                if (!isWithinRadius) {
-                    const storeList = stores.map((store) => `${store.name} (${store.radius}m)`).join(', ');
-                    alert(`Anda harus berada di salah satu lokasi: ${storeList}`);
-                    return;
-                }
-
-                const currentTime = formatTimeToHHMMSS(Date.now());
-                await handleUpdateAttendance(recordId, {
-                    [actionType]: currentTime,
-                    status: actionType === 'clock_in' ? 'working' : 'finished',
-                });
-            } catch (error) {
-                alert(`Gagal mendapatkan lokasi: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
+
+            const nearby = stores.find((s) => calculateDistance(latitude, longitude, s.lat, s.lng) <= s.radius);
+
+            if (!nearby) {
+                setStoresList(stores);
+                setShowLocationAlert(true);
+                return;
+            }
+
+            return handleUpdateAttendance(recordId, actionType);
         },
         [handleUpdateAttendance],
     );
@@ -138,10 +116,9 @@ export default function AttendanceRecapPage() {
                 <>
                     <div className="mx-4 mt-16 flex justify-center">
                         {attendanceRecords.map((record) => (
-                            // rounded-lg border p-15
                             <div key={record.id} className="space-y-8 text-center">
                                 {/* Tanggal */}
-                                <p className="text-sm">{formatLongDate(new Date(record.date))}</p>
+                                <p className="text-sm">{new Date(record.date).toLocaleDateString('id-ID', { dateStyle: 'full' })}</p>
 
                                 {/* Shift */}
                                 <div className="text-sm">
@@ -152,7 +129,7 @@ export default function AttendanceRecapPage() {
                                 {/* Jam Masuk */}
                                 <div className="space-y-4">
                                     <p className="text-muted-foreground text-sm">Jam Masuk</p>
-                                    {record.status === 'leave' ? (
+                                    {record.status === 'leave' || record.status === 'sick' ? (
                                         <p className="text-sm font-medium">-</p>
                                     ) : record.clock_in ? (
                                         <p className="text-sm font-medium">{record.clock_in}</p>
@@ -166,7 +143,7 @@ export default function AttendanceRecapPage() {
                                 {/* Jam Pulang */}
                                 <div className="space-y-4">
                                     <p className="text-muted-foreground text-sm">Jam Pulang</p>
-                                    {record.status === 'leave' ? (
+                                    {record.status === 'leave' || record.status === 'sick' ? (
                                         <p className="text-sm font-medium">-</p>
                                     ) : record.clock_out ? (
                                         <p className="text-sm font-medium">{record.clock_out}</p>
@@ -186,18 +163,15 @@ export default function AttendanceRecapPage() {
                                 {/* Status */}
                                 <div className="space-y-4">
                                     <p className="text-muted-foreground text-sm">Status Kehadiran</p>
-                                    <div>
-                                        <AttendanceStatusBadge status={record.status} />
-                                    </div>
+                                    <AttendanceStatusBadge status={record.status} />
                                 </div>
 
                                 {/* tombol tidak masuk */}
-                                {/* <p>Tidak Masuk Kerja</p> */}
                                 <div className="space-x-4">
                                     {record.status === 'not_started' && (
                                         <Button
                                             className="mt-8 border border-fuchsia-500 bg-transparent text-fuchsia-500 hover:bg-fuchsia-500/15"
-                                            onClick={() => handleUpdateAttendance(record.id, { status: 'sick' })}
+                                            onClick={() => handleUpdateAttendance(record.id, 'sick')}
                                         >
                                             Libur Sakit
                                         </Button>
@@ -206,7 +180,7 @@ export default function AttendanceRecapPage() {
                                     {record.status === 'not_started' && (
                                         <Button
                                             className="mt-8 border border-rose-500 bg-transparent text-rose-500 hover:bg-rose-500/15"
-                                            onClick={() => handleUpdateAttendance(record.id, { status: 'leave' })}
+                                            onClick={() => handleUpdateAttendance(record.id, 'leave')}
                                         >
                                             Libur Cuti
                                         </Button>
@@ -222,22 +196,39 @@ export default function AttendanceRecapPage() {
                             <li>absensi Kehadiran "Jam Masuk" dan "Jam Pulang" hanya bisa dilakukan di toko saja, kecuali tombol "Tidak Masuk Kerja" bisa dilakukan dimana saja.</li>
                             <li>Jika sampai jam 14:00 tidak menekan tombol "Jam Masuk", maka status kehadiran akan otomatis menjadi "Tidak Masuk".</li>
                             <li>
-                                Bagi karyawan shift Pagi, jika masuk sebelum pukul {formatTimeToHHMM(attendanceRules[1].punctual_end)}, akan mendapatkan bonus sebesar Rp{' '}
-                                {bonusPenaltySettings.bonus_amount.toLocaleString('id-ID')} per hari. Sebaliknya, jika masuk setelah pukul{' '}
-                                {formatTimeToHHMM(attendanceRules[1].late_threshold)}, akan dikenakan potongan gaji sebesar Rp{' '}
-                                {bonusPenaltySettings.penalty_amount.toLocaleString('id-ID')} per hari.
+                                Bagi karyawan shift Pagi, jika masuk sebelum pukul {attendanceRules[1].punctual_end}, akan mendapatkan bonus sebesar Rp{' '}
+                                {bonusPenaltySettings.bonus_amount.toLocaleString('id-ID')} per hari. Sebaliknya, jika masuk setelah pukul {attendanceRules[1].late_threshold}, akan
+                                dikenakan potongan gaji sebesar Rp {bonusPenaltySettings.penalty_amount.toLocaleString('id-ID')} per hari.
                             </li>
                             <li>
-                                Bagi karyawan shift Siang, jika masuk sebelum pukul {formatTimeToHHMM(attendanceRules[2].punctual_end)}, akan mendapatkan bonus sebesar Rp{' '}
-                                {bonusPenaltySettings.bonus_amount.toLocaleString('id-ID')} per hari. Sebaliknya, jika masuk setelah pukul{' '}
-                                {formatTimeToHHMM(attendanceRules[2].late_threshold)}, akan dikenakan potongan gaji sebesar Rp{' '}
-                                {bonusPenaltySettings.penalty_amount.toLocaleString('id-ID')} per hari.
+                                Bagi karyawan shift Siang, jika masuk sebelum pukul {attendanceRules[2].punctual_end}, akan mendapatkan bonus sebesar Rp{' '}
+                                {bonusPenaltySettings.bonus_amount.toLocaleString('id-ID')} per hari. Sebaliknya, jika masuk setelah pukul {attendanceRules[2].late_threshold}, akan
+                                dikenakan potongan gaji sebesar Rp {bonusPenaltySettings.penalty_amount.toLocaleString('id-ID')} per hari.
                             </li>
                             <li>Waktu kerja yang melebihi 8.5 jam akan dianggap sebagai kerja lembur dan akan diberikan gaji lembur harian.</li>
                         </ul>
                     </div>
                 </>
             )}
+
+            <AlertDialog open={showLocationAlert} onOpenChange={setShowLocationAlert}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Lokasi Tidak Valid</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Anda harus berada di salah satu lokasi berikut:
+                            {storesList.map((store, index) => (
+                                <li key={index}>
+                                    {store.name} (radius {store.radius}m)
+                                </li>
+                            ))}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction onClick={() => setShowLocationAlert(false)}>OK</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AppLayout>
     );
 }
