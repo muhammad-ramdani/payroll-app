@@ -38,7 +38,6 @@ class ShiftController extends Controller
         return Inertia::render('ShiftForEmployeePage', [
             'userShifts'            => $user->shifts()->with('user')->get(),
             'otherShifts'           => Shift::with('user')->where('user_id', '!=', $user->id)->orderBy('shift_type', 'asc')->orderBy(User::select('name')->whereColumn('users.id', 'shifts.user_id'), 'asc')->get(),
-            // 'receivedRequests'      => ShiftSwap::with(['requesterShift.user', 'targetShift.user', 'requester'])->where('target_user_id', $user->id)->get(),
             'sentRequests'          => ShiftSwap::where('requester_id', $user->id)->where('status', 'pending')->get(),
             'globalPendingShiftIds' => ShiftSwap::where('status', 'pending')->get(['requester_shift_id', 'target_shift_id'])->flatMap(fn($swap) => [$swap->requester_shift_id, $swap->target_shift_id])->unique()->values()->toArray(),
         ]);
@@ -62,7 +61,5 @@ class ShiftController extends Controller
             'target_shift_id' => $targetShift->id,
             'status' => 'pending'
         ]);
-
-        return back();
     }
 }

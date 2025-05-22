@@ -10,8 +10,8 @@ export default function ShiftForEmployeePage({ userShifts, otherShifts, sentRequ
     const pendingShiftIds = new Set(sentRequests.map((r) => r.target_shift_id));
     const globalPendingSet = new Set<number>(globalPendingShiftIds);
 
-    const handleRequestSwap = (shiftId: number) => {
-        router.post('/swap-requests', { shift_id: shiftId });
+    const handleRequestSwap = (id: number) => {
+        router.post('/swap-requests', { shift_id: id });
     };
 
     return (
