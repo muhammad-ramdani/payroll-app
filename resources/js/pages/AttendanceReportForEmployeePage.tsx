@@ -1,4 +1,4 @@
-// AttendanceReportForAdminPage.tsx
+// AttendanceReportForEmployeePage.tsx
 import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,7 +12,7 @@ interface Props {
     attendances: Attendance[];
 }
 
-export default function AttendanceReportForAdminPage({ attendances }: Props) {
+export default function AttendanceReportForEmployeePage({ attendances }: Props) {
     // ==================== LOGIKA FILTER TAHUN ====================
     // Mendapatkan daftar tahun unik dari data absensi
     const availableYears = useMemo(() => {
@@ -143,7 +143,7 @@ export default function AttendanceReportForAdminPage({ attendances }: Props) {
 
                             {/* Bar chart untuk hari tidak masuk */}
                             <Bar dataKey="leave" fill="var(--color-leave)" radius={[8, 8, 0, 0]} />
-                            
+
                             <Bar dataKey="sick" fill="var(--color-sick)" radius={[8, 8, 0, 0]} />
                         </BarChart>
                     </ChartContainer>

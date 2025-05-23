@@ -32,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('rekap-absensi', [AttendanceRecapController::class, 'index']);
 
-        Route::get('laporan-absensi-karyawan', [AttendanceReportController::class, 'employee'])->name('laporan-absensi.employee');
+        Route::get('laporan-absensi-karyawan', [AttendanceReportController::class, 'employee']);
     });
 
     Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
@@ -52,19 +52,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('aturan-absensi', [AttendanceRuleSettingController::class, 'index'])->name('aturan-absensi');
         Route::patch('aturan-absensi', [AttendanceRuleSettingController::class, 'update'])->name('aturan-absensi.update');
 
-        // ini route untuk perhitungan penggajian
         Route::get('perhitungan-penggajian', [PayrollCalculationController::class, 'index']);
         Route::patch('perhitungan-penggajian/paid/{payroll}', [PayrollCalculationController::class, 'paid']);
         Route::patch('perhitungan-penggajian/calculate/{payroll}', [PayrollCalculationController::class, 'calculate']);
 
-        // ini route untuk data karyawan
         Route::get('data-karyawan', [EmployeeController::class, 'index'])->name('data-karyawan.index');
         Route::post('data-karyawan', [EmployeeController::class, 'store'])->name('data-karyawan.store');
         Route::patch('data-karyawan/{employee}', [EmployeeController::class, 'update'])->name('data-karyawan.update');
         Route::delete('data-karyawan/{employee}', [EmployeeController::class, 'destroy'])->name('data-karyawan.destroy');
     });
 
-    Route::get('penggajian/pdf/{id}', [PayrollController::class, 'generatePDF'])->name('penggajian.pdf');
+    Route::get('penggajian/pdf/{id}', [PayrollController::class, 'generatePDF']);
 });
 
 require __DIR__ . '/settings.php';
