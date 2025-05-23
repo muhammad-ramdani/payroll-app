@@ -26,10 +26,6 @@ class ShiftSwapController extends Controller
     public function approveSwap(Request $request, $id)
     {
         $swapRequest = ShiftSwap::findOrFail($id);
-        
-        if ($swapRequest->target_user_id !== auth()->id()) {
-            abort(403);
-        }
 
         // Lakukan pertukaran
         $requesterShift = Shift::findOrFail($swapRequest->requester_shift_id);
@@ -45,20 +41,12 @@ class ShiftSwapController extends Controller
 
         // Hapus request setelah pertukaran berhasil
         $swapRequest->delete();
-
-        return back();
     }
 
     public function rejectSwap(Request $request, $id)
     {
         $swapRequest = ShiftSwap::findOrFail($id);
-        
-        if ($swapRequest->target_user_id !== auth()->id()) {
-            abort(403);
-        }
 
         $swapRequest->delete();
-
-        return back();
     }
 }
