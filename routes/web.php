@@ -10,6 +10,7 @@ use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\AttendanceRuleSettingController;
 use App\Http\Controllers\ShiftSwapController;
+use App\Http\Controllers\AttendanceRecapController;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,7 +30,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('permintaan-tukar-shift/{id}/approve', [ShiftSwapController::class, 'approveSwap'])->name('permintaan-tukar-shift.approve');
         Route::post('permintaan-tukar-shift/{id}/reject', [ShiftSwapController::class, 'rejectSwap'])->name('permintaan-tukar-shift.reject');
 
-        Route::get('rekap-absensi', [AttendanceController::class, 'recap'])->name('rekap-absensi');
+        Route::get('rekap-absensi', [AttendanceRecapController::class, 'index']);
 
         Route::get('laporan-absensi-karyawan', [AttendanceReportController::class, 'employee'])->name('laporan-absensi.employee');
     });
