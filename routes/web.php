@@ -3,6 +3,8 @@
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\PayrollCalculationController;
+use App\Http\Controllers\PayrollReportController;
 use App\Http\Controllers\MonitoringAttendanceController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ShiftController;
@@ -17,8 +19,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('absensi', [AttendanceController::class, 'index'])->name('absensi');
         Route::patch('absensi/{attendance}', [AttendanceController::class, 'update'])->name('absensi.update');
         
-        Route::get('penggajian', [PayrollController::class, 'employee'])->name('penggajian');
-        Route::patch('penggajian/confirmation/{payroll}', [PayrollController::class, 'confirmation'])->name('penggajian.confirmation');
+        Route::get('penggajian', [PayrollController::class, 'index']);
+        Route::patch('penggajian/confirmation/{payroll}', [PayrollController::class, 'confirmation']);
         
         Route::get('shift-karyawan', [ShiftController::class, 'employee'])->name('shift-karyawan.employee');
         Route::post('swap-requests', [ShiftController::class, 'requestSwap'])->name('swap-requests.create');
@@ -39,9 +41,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('monitoring-absensi', [MonitoringAttendanceController::class, 'index'])->name('monitoring-absensi.index');
 
-        Route::get('laporan-absensi-admin', [AttendanceReportController::class, 'admin'])->name('laporan-absensi.admin');
+        Route::get('laporan-absensi-admin', [AttendanceReportController::class, 'admin']);
 
-        Route::get('laporan-penggajian', [PayrollController::class, 'report'])->name('laporan-penggajian');
+        Route::get('laporan-penggajian', [PayrollReportController::class, 'index']);
 
         Route::get('admin-shift-karyawan', [ShiftController::class, 'admin'])->name('admin-shift-karyawan.admin');
         Route::patch('admin-shift-karyawan/{user}', [ShiftController::class, 'update'])->name('admin-shift-karyawan.update');
@@ -50,9 +52,9 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('aturan-absensi', [AttendanceRuleSettingController::class, 'update'])->name('aturan-absensi.update');
 
         // ini route untuk perhitungan penggajian
-        Route::get('perhitungan-penggajian', [PayrollController::class, 'index'])->name('perhitungan-penggajian');
-        Route::patch('perhitungan-penggajian/paid/{payroll}', [PayrollController::class, 'paid'])->name('perhitungan-penggajian.paid');
-        Route::patch('perhitungan-penggajian/calculate/{payroll}', [PayrollController::class, 'calculate'])->name('perhitungan-penggajian.calculate');
+        Route::get('perhitungan-penggajian', [PayrollCalculationController::class, 'index']);
+        Route::patch('perhitungan-penggajian/paid/{payroll}', [PayrollCalculationController::class, 'paid']);
+        Route::patch('perhitungan-penggajian/calculate/{payroll}', [PayrollCalculationController::class, 'calculate']);
 
         // ini route untuk data karyawan
         Route::get('data-karyawan', [EmployeeController::class, 'index'])->name('data-karyawan.index');
