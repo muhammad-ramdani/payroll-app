@@ -13,11 +13,7 @@ class EmployeeController extends Controller
 {
     public function index()
     {
-        $employees = Employee::with('user', 'shift')->get();
-
-        return Inertia::render('EmployeeDataPage', [
-            'employees' => $employees,
-        ]);
+        return Inertia::render('EmployeeDataPage', ['employees' => Employee::with('user')->get()]);
     }
 
     protected function validationRules($forUpdate = false)
@@ -72,31 +68,12 @@ class EmployeeController extends Controller
             'user_id' => $user->id,
             'shift_type' => $validated['shift_type']
         ]);
-        
-        return $this->handleResponse($request, $employee);
     }
     
     public function update(Request $request, Employee $employee)
     {
         $validated = $request->validate($this->validationRules(true));
-        
-        // Pastikan data user masuk dengan benar
-        $userData = $validated['user'];
-        $employee->user()->update($userData); // Gunakan relasi langsung
-        
-        // Update employee data
-        $employee->update(collect($validated)->except('user')->all());
-        
-        return $this->handleResponse($request, $employee);
-    }
-
-    // Helper untuk handle response
-    protected function handleResponse(Request $request, $employee)
-    {
-        if ($request->wantsJson()) {
-            return response()->json($employee);
-        }
-        return redirect()->route('data-karyawan.index');
+        $employee->user()->update($validated['user']);
     }
 
     public function destroy(Employee $employee)

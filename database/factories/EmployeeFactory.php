@@ -10,6 +10,7 @@ class EmployeeFactory extends Factory
     public function definition(): array
     {
         return [
+            'id'                 => User::factory(),
             'user_id'            => User::factory(),
             'phone'              => $this->faker->phoneNumber(),
             'address'            => $this->faker->address(),

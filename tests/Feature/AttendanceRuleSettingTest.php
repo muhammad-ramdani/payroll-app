@@ -20,35 +20,6 @@ test('user yang terautentikasi role karyawan tidak dapat mengakses halaman Atura
     $this->get('/aturan-absensi')->assertRedirect('/absensi');
 });
 
-// test('admin dapat mengupdate Aturan Absensi', function () {
-//     $user = User::factory()->create(['role' => 'admin']);
-
-//     // akses halaman edit
-//     $this->actingAs($user)->get('/aturan-absensi')->assertOk();
-
-//     // update data
-//     $payload = [
-//         'attendanceRules' => [
-//             [
-//                 'id' => 1,
-//                 'punctual_end' => '07:25',
-//                 'late_threshold' => '08:10',
-//             ],
-//             [
-//                 'id' => 2,
-//                 'punctual_end' => '12:25',
-//                 'late_threshold' => '13:10',
-//             ],
-//         ],
-//         'bonus_penalty' => [
-//             'id' => 1,
-//             'bonus_amount' => 10000,
-//             'penalty_amount' => 8000,
-//         ],
-//     ];
-//     $this->patch('/aturan-absensi', $payload)->assertRedirect();
-// });
-
 test('admin dapat mengupdate Aturan Absensi', function () {
     // Buat data dummy yang akan diupdate
     $bonusPenalty = AttendanceBonusPenaltySetting::factory()->create();
@@ -64,13 +35,11 @@ test('admin dapat mengupdate Aturan Absensi', function () {
                 'id' => 1,
                 'punctual_end' => '07:25',
                 'late_threshold' => '08:10',
-                'attendance_bonus_penalty_id' => '1',
             ],
             [
                 'id' => 2,
                 'punctual_end' => '12:25',
                 'late_threshold' => '13:10',
-                'attendance_bonus_penalty_id' => '1',
             ],
         ],
         'bonus_penalty' => [

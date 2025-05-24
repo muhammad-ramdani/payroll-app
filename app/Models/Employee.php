@@ -33,11 +33,6 @@ class Employee extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function shift()
-    {
-        return $this->belongsTo(Shift::class);
-    }
-
     protected static function booted(): void
     {
         static::deleting(function (Employee $employee) {

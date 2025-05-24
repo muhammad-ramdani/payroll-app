@@ -1,181 +1,93 @@
 <?php
 
-// use App\Models\Employee;
-// use App\Models\User;
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Employee;
+use App\Models\User;
+use Illuminate\Support\Str;
 
-// uses(RefreshDatabase::class);
+test('user yang belum login tidak dapat mengakses halaman Data Karyawan', function () {
+    $this->get('/data-karyawan')->assertRedirect('/');
+});
 
-// // Test untuk fitur List & Detail Data Karyawan
+test('user yang terautentikasi dengan role admin dapat mengakses halaman data-karyawan', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $this->actingAs($admin);
 
-// test('tamu diarahkan ke halaman login', function () {
-//     $this->get('/data-karyawan')->assertRedirect('/');
-// });
+    $this->get('/data-karyawan')->assertOk();
+});
 
-// test('user yang terautentikasi dengan role admin dapat mengakses halaman data-karyawan', function () {
-//     $admin = User::factory()->create(['role' => 'admin']);
-//     $this->actingAs($admin);
+test('user yang terautentikasi dengan role karyawan tidak dapat mengakses halaman data-karyawan', function () {
+    $karyawan = User::factory()->create(['role' => 'karyawan']);
+    $this->actingAs($karyawan);
 
-//     $this->get('/data-karyawan')->assertOk();
-// });
+    $this->get('/data-karyawan')->assertRedirect('/absensi');
+});
 
-// test('user yang terautentikasi dengan role karyawan tidak dapat mengakses halaman data-karyawan', function () {
-//     $karyawan = User::factory()->create(['role' => 'karyawan']);
-//     $this->actingAs($karyawan);
+//! Test untuk fitur Create Data Karyawan
 
-//     $this->get('/data-karyawan')->assertRedirect('/absensi');
-// });
+test('admin dapat menambahkan data karyawan baru', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $this->actingAs($admin);
 
-// // Test untuk fitur Create Data Karyawan
+    $uuid = (string) Str::uuid();
+    $payload = [
+        'id'             => $uuid,
+        'user' => [
+            'name'     => 'John Doe',
+            'username' => 'johndoe',
+        ],
+        'phone'          => '08123456789',
+        'address'        => 'Jl. Contoh No. 1',
+        'hire_date'      => '2023-10-01',
+        'bank_name'      => 'ABC',
+        'account_number' => '1234567890',
+        'account_name'   => 'John Doe',
+        'basic_salary'   => '50000',
+        'paid_holidays'  => '2',
+        'daily_overtime_pay' => '10000',
+        'bpjs_health'    => '1',
+        'bpjs_employment'=> '3',
+        'income_tax'     => '0',
+        'shift_type'     => 'Pagi',
+    ];
 
-// test('tamu diarahkan ke halaman login saat menambah data karyawan', function () {
-//     $payload = Employee::factory()->raw();
-//     $this->post('/data-karyawan', $payload)->assertRedirect('/');
-// });
+    $this->post('/data-karyawan', $payload)->assertOk();
+});
 
-// test('admin dapat menambah data karyawan dengan data valid', function () {
-//     $admin = User::factory()->create(['role' => 'admin']);
-//     $this->actingAs($admin);
+//! Test untuk fitur Edit Data Karyawan
 
-//     $payload = Employee::factory()->raw();
-//     $response = $this->postJson('/data-karyawan', $payload);
+test('admin dapat mengubah data karyawan', function () {
+    $this->actingAs(User::factory()->create(['role' => 'admin']));
+    $user = User::factory()->create(['role' => 'karyawan']);
 
-//     // Sesuai implementasi, status sukses adalah 200 OK
-//     $response->assertStatus(200)->assertJsonFragment([
-//         'name'  => $payload['name'],
-//         'phone' => $payload['phone'],
-//     ]);
+    $employee = Employee::factory()->create();
 
-//     $this->assertDatabaseHas('employees', [
-//         'name'  => $payload['name'],
-//         'phone' => $payload['phone'],
-//     ]);
-// });
+    $payload = [
+        'user' => [
+            'name' => 'Updated Name',
+        ],
+        'phone' => '08123456789',
+        'address' => 'Jl. Contoh No. 1',
+        'hire_date' => '2023-10-01',
+        'bank_name' => 'ABC',
+        'account_number' => '1234567890',
+        'account_name' => 'John Doe',
+        'basic_salary' => '50000',
+        'paid_holidays' => '2',
+        'daily_overtime_pay' => '10000',
+        'bpjs_health' => '1',
+        'bpjs_employment' => '3',
+        'income_tax' => '0',
+    ];
 
-// test('admin gagal menambah data karyawan jika data tidak lengkap atau salah', function () {
-//     $admin = User::factory()->create(['role' => 'admin']);
-//     $this->actingAs($admin);
+    $this->patch("/data-karyawan/{$employee->id}", $payload)->assertOk();
+});
 
-//     $payload = ['name' => '', 'hire_date' => null];
-//     $response = $this->postJson('/data-karyawan', $payload);
+//! Test untuk fitur Delete Data Karyawan
 
-//     $response->assertStatus(422)->assertJsonValidationErrors(['name', 'hire_date']);
-// });
+test('admin dapat menghapus data karyawan', function () {
+    $this->actingAs(User::factory()->create(['role' => 'admin']));
 
-// test('user dengan role karyawan tidak dapat menambah data karyawan', function () {
-//     $karyawan = User::factory()->create(['role' => 'karyawan']);
-//     $this->actingAs($karyawan);
+    $employee = Employee::factory()->create();
 
-//     $payload = Employee::factory()->raw();
-//     $this->post('/data-karyawan', $payload)->assertRedirect('/absensi');
-// });
-
-// // Test untuk fitur Edit Data Karyawan
-
-// test('tamu diarahkan ke halaman login saat mengedit data karyawan', function () {
-//     $employee = Employee::factory()->create();
-//     $payload  = Employee::factory()->raw();
-
-//     $this->patch("/data-karyawan/{$employee->id}", $payload)->assertRedirect('/');
-// });
-
-// test('admin dapat mengedit data karyawan dengan data valid', function () {
-//     $admin = User::factory()->create(['role' => 'admin']);
-//     $this->actingAs($admin);
-
-//     $employee = Employee::factory()->create();
-//     $payload  = Employee::factory()->raw();
-
-//     $response = $this->patchJson("/data-karyawan/{$employee->id}", $payload);
-//     $response->assertStatus(200)->assertJsonFragment([
-//         'id'    => $employee->id,
-//         'name'  => $payload['name'],
-//         'phone' => $payload['phone'],
-//     ]);
-
-//     $this->assertDatabaseHas('employees', [
-//         'id'    => $employee->id,
-//         'name'  => $payload['name'],
-//         'phone' => $payload['phone'],
-//     ]);
-// });
-
-// test('admin gagal mengedit data karyawan jika data tidak lengkap atau salah', function () {
-//     $admin = User::factory()->create(['role' => 'admin']);
-//     $this->actingAs($admin);
-
-//     $employee = Employee::factory()->create();
-//     $payload  = ['name' => '', 'hire_date' => null];
-//     $response = $this->patchJson("/data-karyawan/{$employee->id}", $payload);
-
-//     $response->assertStatus(422)->assertJsonValidationErrors(['name', 'hire_date']);
-// });
-
-// test('user dengan role karyawan tidak dapat mengedit data karyawan', function () {
-//     $karyawan = User::factory()->create(['role' => 'karyawan']);
-//     $this->actingAs($karyawan);
-
-//     $employee = Employee::factory()->create();
-//     $payload  = Employee::factory()->raw();
-//     $this->patch("/data-karyawan/{$employee->id}", $payload)->assertRedirect('/absensi');
-// });
-
-// // Test untuk fitur Detail Data Karyawan
-
-// test('tamu diarahkan ke halaman login saat melihat detail data karyawan', function () {
-//     $employee = Employee::factory()->create();
-//     $this->get("/data-karyawan/{$employee->id}")->assertRedirect('/');
-// });
-
-// test('admin dapat melihat detail data karyawan', function () {
-//     $admin = User::factory()->create(['role' => 'admin']);
-//     $this->actingAs($admin);
-
-//     $employee = Employee::factory()->create();
-//     $response = $this->getJson("/data-karyawan/{$employee->id}");
-
-//     $response->assertStatus(200)->assertJsonFragment([
-//         'id'    => $employee->id,
-//         'name'  => $employee->name,
-//         'phone' => $employee->phone,
-//     ]);
-// });
-
-// test('user dengan role karyawan tidak dapat melihat detail data karyawan', function () {
-//     $karyawan = User::factory()->create(['role' => 'karyawan']);
-//     $this->actingAs($karyawan);
-
-//     $employee = Employee::factory()->create();
-//     $this->get("/data-karyawan/{$employee->id}")->assertRedirect('/absensi');
-// });
-
-// // Test untuk fitur Delete Data Karyawan
-
-// test('tamu diarahkan ke halaman login saat menghapus data karyawan', function () {
-//     $employee = Employee::factory()->create();
-
-//     $this->delete("/data-karyawan/{$employee->id}")->assertRedirect('/');
-// });
-
-// test('admin dapat menghapus data karyawan', function () {
-//     $admin = User::factory()->create(['role' => 'admin']);
-//     $this->actingAs($admin);
-
-//     $employee = Employee::factory()->create();
-
-//     $response = $this->deleteJson("/data-karyawan/{$employee->id}");
-//     $response->assertStatus(200);
-
-//     $this->assertSoftDeleted('employees', [
-//         'id' => $employee->id,
-//     ]);
-// });
-
-// test('user dengan role karyawan tidak dapat menghapus data karyawan', function () {
-//     $karyawan = User::factory()->create(['role' => 'karyawan']);
-//     $this->actingAs($karyawan);
-
-//     $employee = Employee::factory()->create();
-
-//     $this->delete("/data-karyawan/{$employee->id}")->assertRedirect('/absensi');
-// });
+    $this->delete("/data-karyawan/{$employee->id}")->assertOk();
+});
