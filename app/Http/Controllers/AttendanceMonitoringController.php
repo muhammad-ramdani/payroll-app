@@ -11,10 +11,8 @@ class AttendanceMonitoringController extends Controller
 {
     public function index()
     {
-        $monitoring_attendances = Attendance::with('user')->orderBy('shift_type', 'asc')->orderBy(User::select('name')->whereColumn('users.id', 'attendances.user_id'), 'asc')->get();
-
         return Inertia::render('AttendanceMonitoringPage', [
-            'monitoring_attendances' => $monitoring_attendances,
+            'monitoring_attendances' => Attendance::with('user')->orderBy('shift_type', 'asc')->orderBy(User::select('name')->whereColumn('users.id', 'attendances.user_id'), 'asc')->get()
         ]); 
     }
 }

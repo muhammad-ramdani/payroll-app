@@ -42,7 +42,7 @@ Route::middleware(['auth'])->group(function () {
             return Inertia::render('DashboardPage');
         })->name('dashboard');
 
-        Route::get('monitoring-absensi', [AttendanceMonitoringController::class, 'index'])->name('monitoring-absensi.index');
+        Route::get('monitoring-absensi', [AttendanceMonitoringController::class, 'index']);
 
         Route::get('laporan-absensi-admin', [AttendanceReportController::class, 'admin']);
 
