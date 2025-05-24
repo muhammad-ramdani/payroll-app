@@ -15,13 +15,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
-        Route::get('settings/toko', [ShopProfileController::class, 'edit'])->name('toko');
-        Route::patch('settings/toko', [ShopProfileController::class, 'update'])->name('toko.update');
+        Route::get('settings/toko', [ShopProfileController::class, 'edit']);
+        Route::patch('settings/toko', [ShopProfileController::class, 'update']);
     });
 
     Route::middleware(['auth', RoleMiddleware::class . ':karyawan'])->group(function () {
-        Route::get('settings/data-diri', [PersonalDataController::class, 'edit'])->name('data-diri');
-        Route::patch('settings/data-diri', [PersonalDataController::class, 'update'])->name('data-diri.update');
+        Route::get('settings/data-diri', [PersonalDataController::class, 'edit']);
+        Route::patch('settings/data-diri', [PersonalDataController::class, 'update']);
     });
 
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
