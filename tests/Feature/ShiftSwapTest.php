@@ -95,3 +95,21 @@ test('karyawan yang mendapatkan permintaan tukar shift dapat menekan tombol tida
         'id' => $swapRequest->id,
     ]);
 });
+
+test('model ShiftSwap memiliki relasi ke requesterShift', function () {
+    $swap = ShiftSwap::factory()->create();
+    
+    $this->assertInstanceOf(Shift::class, $swap->requesterShift);
+});
+
+test('model ShiftSwap memiliki relasi ke targetShift', function () {
+    $swap = ShiftSwap::factory()->create();
+    
+    $this->assertInstanceOf(Shift::class, $swap->targetShift);
+});
+
+test('model ShiftSwap memiliki relasi ke requester', function () {
+    $swap = ShiftSwap::factory()->create();
+    
+    $this->assertInstanceOf(User::class, $swap->requester);
+});

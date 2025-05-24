@@ -18,7 +18,7 @@ test('user yang terautentikasi role karyawan tidak dapat mengakses halaman toko 
     $this->get('/settings/toko')->assertRedirect('/absensi');
 });
 
-test('karyawan yang dapat mengupdate toko', function () {
+test('admin yang dapat mengupdate toko', function () {
     $user = User::factory()->create(['role' => 'admin']);
 
     // akses halaman edit

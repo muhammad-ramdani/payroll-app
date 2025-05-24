@@ -43,3 +43,9 @@ test('karyawan dapat meminta tukar shift', function () {
         'status' => 'pending',
     ]);
 });
+
+test('model Shift memiliki relasi ke user', function () {
+    $shift = Shift::factory()->create();
+    
+    $this->assertInstanceOf(User::class, $shift->user);
+});

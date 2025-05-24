@@ -44,17 +44,4 @@ class Payroll extends Model
     {
         return $this->belongsTo(User::class)->withTrashed();
     }
-
-    public function attendancerulesetting()
-    {
-        return $this->belongsTo(AttendanceRuleSetting::class);
-    }
-
-    public static function existsForPeriod($userId, $month, $year): bool
-    {
-        return self::where('user_id', $userId)
-            ->where('period_month', $month)
-            ->where('period_year', $year)
-            ->exists();
-    }
 }

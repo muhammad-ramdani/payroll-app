@@ -26,7 +26,5 @@ class PersonalDataController extends Controller
         ]);
 
         auth()->user()->employee->update($validated);
-
-        return back();
     }
 }

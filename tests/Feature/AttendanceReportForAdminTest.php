@@ -6,13 +6,13 @@ test('user yang belum login tidak dapat mengakses halaman laporan absensi', func
     $this->get('/laporan-absensi-admin')->assertRedirect('/');
 });
 
-test('user yang terautentikasi role karyawan dapat mengakses halaman laporan absensi', function () {
+test('user yang terautentikasi role admin dapat mengakses halaman laporan absensi', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'admin']));
 
     $this->get('/laporan-absensi-admin')->assertOk();
 });
 
-test('user yang terautentikasi role admin tidak dapat mengakses halaman laporan absensi', function () {
+test('user yang terautentikasi role karyawan tidak dapat mengakses halaman laporan absensi', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'karyawan']));
 
     $this->get('/laporan-absensi-admin')->assertRedirect('/absensi');

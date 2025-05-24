@@ -34,5 +34,5 @@ test('karyawan yang dapat mengupdate data diri', function () {
         'account_number' => '1234567890',
         'account_name' => 'Nama Karyawan',
     ];
-    $this->patch('/settings/data-diri', $payload)->assertRedirect();
+    $this->patch('/settings/data-diri', $payload)->assertOk();
 });

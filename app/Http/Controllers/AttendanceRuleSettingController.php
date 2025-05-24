@@ -34,7 +34,5 @@ class AttendanceRuleSettingController extends Controller
             
             AttendanceBonusPenaltySetting::find($validated['bonus_penalty']['id'])->update($validated['bonus_penalty']);
         });
-
-        return back();
     }
 }

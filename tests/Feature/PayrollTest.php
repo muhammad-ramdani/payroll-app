@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\User;
+use App\Models\Employee;
 use App\Models\Payroll;
+use App\Models\AttendanceRuleSetting;
 
 test('user yang belum login tidak dapat mengakses halaman penggajian', function () {
     $this->get('/penggajian')->assertRedirect('/');
@@ -33,3 +35,11 @@ test('karyawan dapat dapat mengganti status konfirmasi dari pending_confirmation
 
     $response->assertOk();
 });
+
+// test('model Payroll memiliki relasi ke attendancerulesetting', function () {
+//     $user = User::factory()->create(['role' => 'karyawan']);
+//     $employee = Employee::factory()->create(['user_id' => $user->id]);
+//     $payroll = Payroll::factory()->create(['user_id' => $employee->user_id]);
+    
+//     $this->assertInstanceOf(AttendanceRuleSetting::class, $payroll->attendancerulesetting);
+// });
