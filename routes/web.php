@@ -48,8 +48,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('laporan-penggajian', [PayrollReportController::class, 'index']);
 
-        Route::get('admin-shift-karyawan', [ShiftForAdminController::class, 'index'])->name('admin-shift-karyawan.admin');
-        Route::patch('admin-shift-karyawan/{user}', [ShiftForAdminController::class, 'update'])->name('admin-shift-karyawan.update');
+        Route::get('admin-shift-karyawan', [ShiftForAdminController::class, 'index']);
+        Route::patch('admin-shift-karyawan/{user}', [ShiftForAdminController::class, 'update']);
 
         Route::get('aturan-absensi', [AttendanceRuleSettingController::class, 'index']);
         Route::patch('aturan-absensi', [AttendanceRuleSettingController::class, 'update'])->name('aturan-absensi.update');

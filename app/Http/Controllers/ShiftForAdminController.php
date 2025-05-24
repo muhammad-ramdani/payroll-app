@@ -18,11 +18,8 @@ class ShiftForAdminController extends Controller
 
     public function update(Request $request, string $userId)
     {
-        $request->validate([
-            'shift_type' => 'required|in:Pagi,Siang'
-        ]);
-
-        $shift = Shift::where('user_id', $userId)->firstOrFail();
-        $shift->update($request->only('shift_type'));;
+        Shift::where('user_id', $userId)->firstOrFail()->update(
+            $request->validate(['shift_type' => 'required|in:Pagi,Siang'])
+        );
     }
 }
