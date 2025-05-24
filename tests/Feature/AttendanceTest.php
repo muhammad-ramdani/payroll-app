@@ -192,3 +192,10 @@ test('karyawan dapat melakukan absensi cuti', function () {
     expect($attendance->clock_out)->toBeNull();
     expect($attendance->status)->toBe('leave');
 });
+
+test('relasi user dari attendance berfungsi', function () {
+    $user = User::factory()->create();
+    $attendance = Attendance::factory()->create(['user_id' => $user->id]);
+
+    expect($attendance->user)->toBeInstanceOf(User::class);
+});

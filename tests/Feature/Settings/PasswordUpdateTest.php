@@ -3,6 +3,16 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
+test('user yang belum login tidak dapat mengakses halaman password pada settings', function () {
+    $this->get('/settings/password')->assertRedirect('/');
+});
+
+test('user yang terautentikasi dapat mengakses halaman password pada settings', function () {
+    $this->actingAs($user = User::factory()->create());
+
+    $this->get('/settings/password')->assertOk();
+});
+
 test('password dapat diperbarui', function () {
     $user = User::factory()->create();
 

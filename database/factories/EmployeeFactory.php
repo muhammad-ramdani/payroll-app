@@ -3,12 +3,14 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
 
 class EmployeeFactory extends Factory
 {
     public function definition(): array
     {
         return [
+            'user_id'            => User::factory(),
             'phone'              => $this->faker->phoneNumber(),
             'address'            => $this->faker->address(),
             'hire_date'          => $this->faker->dateTimeBetween('2016-01-01', 'now')->format('Y-m-d'),

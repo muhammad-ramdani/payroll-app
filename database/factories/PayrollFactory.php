@@ -10,12 +10,11 @@ class PayrollFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => Employee::factory(),
-            'period_month' => now()->month,
-            'period_year' => now()->year,
-            'salary_status' => 'uncalculated',
+            'user_id'             => Employee::factory(),
+            'period_month'        => now()->month,
+            'period_year'         => now()->year,
+            'salary_status'       => 'uncalculated',
             'confirmation_status' => 'blank',
-
         ];
     }
 }

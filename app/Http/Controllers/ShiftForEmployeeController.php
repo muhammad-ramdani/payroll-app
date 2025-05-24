@@ -8,30 +8,9 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Models\ShiftSwap;
 
-class ShiftController extends Controller
+class ShiftForEmployeeController extends Controller
 {
-    public function admin()
-    {
-        $shifts = Shift::with('user')->orderBy('shift_type', 'asc')->orderBy(User::select('name')->whereColumn('users.id', 'shifts.user_id'), 'asc')->get();
-
-        return Inertia::render('ShiftForAdminPage', [
-            'shifts' => $shifts,
-        ]);
-    }
-
-    public function update(Request $request, string $userId)
-    {
-        $request->validate([
-            'shift_type' => 'required|in:Pagi,Siang'
-        ]);
-
-        $shift = Shift::where('user_id', $userId)->firstOrFail();
-        $shift->update($request->only('shift_type'));
-
-        return redirect()->back()->with('success', 'Shift berhasil diperbarui');
-    }
-
-    public function employee()
+    public function index()
     {
         $user = auth()->user();
 
