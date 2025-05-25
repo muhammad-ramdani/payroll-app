@@ -2,7 +2,6 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Modal from '@/components/ui/modal';
@@ -12,7 +11,7 @@ import { EditModalProps } from '@/types';
 import { addDays, format, startOfDay } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
-import { accountPattern, createKeyDownHandler, digitPattern, formatRupiah, letterPattern, phonePattern, useFormEmployee } from './FormUtils';
+import { formatRupiah, parseRupiah, useFormEmployee } from './FormUtils';
 
 export default function EditModal({ open, onClose, employee, updateEmployee }: EditModalProps) {
     const { data, setData, patch, processing, errors, reset } = useFormEmployee();
@@ -49,14 +48,6 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
         });
     };
 
-    const formatName = (rawName: string) => {
-        return rawName
-            .replace(/\s+/g, ' ')
-            .split(' ')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
-    };
-
     if (!open || !employee) return null;
 
     return (
@@ -68,14 +59,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                     </Label>
                     <Input
                         value={data.user.name}
-                        onChange={(e) => {
-                            const formattedName = formatName(e.target.value);
-                            setData('user', {
-                                ...data.user,
-                                name: formattedName,
-                            });
-                        }}
-                        onKeyDown={createKeyDownHandler(letterPattern)}
+                        onChange={(e) => setData('user', { ...data.user, name: e.target.value.replace(/[^a-zA-Z ,.'-]/g, '') })}
                         minLength={3}
                         maxLength={250}
                     />
@@ -83,122 +67,29 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Alamat</Label>
-                    <Input
-                        placeholder="Maksimal 250 Karakter"
-                        maxLength={250}
-                        value={data.address ?? ''}
-                        onChange={(e) =>
-                            setData(
-                                'address',
-                                e.target.value.replace(/\s+/g, ' ').replace(/(\b\w)(\w*)/g, (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()),
-                            )
-                        }
-                    />
-                    <InputError message={errors.address} />
-                </div>
-
-                <div className="grid items-start gap-4 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                        <Label>Nomor Handphone</Label>
-                        <Input
-                            placeholder="Contoh: 0812-3456-7890"
-                            maxLength={25}
-                            value={data.phone ?? ''}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            onKeyDown={createKeyDownHandler(phonePattern)}
-                        />
-                        <InputError message={errors.phone} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label>
-                            Tanggal Mulai Kerja<span className="text-red-600">*</span>
-                        </Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className={cn('pl-3 text-left font-normal', !data.hire_date && 'text-muted-foreground')}>
-                                    {data.hire_date ? format(data.hire_date as Date, 'PPP') : 'Pilih Tanggal'}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={data.hire_date as Date}
-                                    onSelect={(date) => {
-                                        if (date) setData('hire_date', date);
-                                    }}
-                                    disabled={(date) => date > startOfDay(addDays(new Date(), 2)) || date < new Date('2016-01-01')}
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
-                        <InputError message={errors.hire_date} />
-                    </div>
-                </div>
-
-                <div className="grid items-start gap-4 sm:grid-cols-3">
-                    <div className="grid gap-2">
-                        <Label>Nama Bank</Label>
-                        <Input
-                            minLength={3}
-                            maxLength={50}
-                            placeholder="Contoh: BCA"
-                            value={data.bank_name ?? ''}
-                            onChange={(e) => setData('bank_name', e.target.value.replace(/\s+/g, ' ').toUpperCase())}
-                            onKeyDown={createKeyDownHandler(/^[a-zA-Z ]$/)}
-                        />
-                        <InputError message={errors.bank_name} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label>Nomor Rekening</Label>
-                        <Input
-                            maxLength={100}
-                            value={data.account_number ?? ''}
-                            onChange={(e) => setData('account_number', e.target.value)}
-                            onKeyDown={createKeyDownHandler(accountPattern)}
-                        />
-                        <InputError message={errors.account_number} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label>Nama Pemilik Rekening</Label>
-                        <Input
-                            minLength={3}
-                            maxLength={250}
-                            value={data.account_name ?? ''}
-                            onChange={(e) => {
-                                const formattedValue = e.target.value.replace(/\s+/g, ' ').replace(/(\b\w)(\w*)/g, (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase());
-
-                                setData('account_name', formattedValue);
-
-                                if (formattedValue !== data.user.name) {
-                                    setIsAccountNameSame(false);
-                                }
-                            }}
-                            onKeyDown={createKeyDownHandler(letterPattern)}
-                            disabled={isAccountNameSame} // Tambahkan disabled state
-                        />
-                        <InputError message={errors.account_name} />
-
-                        <div className="mt-2 flex items-center space-x-2">
-                            <Checkbox
-                                id="same-as-name"
-                                checked={isAccountNameSame}
-                                onCheckedChange={(checked) => {
-                                    setIsAccountNameSame(checked === true);
-                                    if (checked) {
-                                        setData('account_name', data.user.name);
-                                    }
+                    <Label>
+                        Tanggal Mulai Kerja<span className="text-red-600">*</span>
+                    </Label>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn('pl-3 text-left font-normal', !data.hire_date && 'text-muted-foreground')}>
+                                {data.hire_date ? format(data.hire_date as Date, 'PPP') : 'Pilih Tanggal'}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={data.hire_date as Date}
+                                onSelect={(date) => {
+                                    if (date) setData('hire_date', date);
                                 }}
+                                disabled={(date) => date > startOfDay(addDays(new Date(), 2)) || date < new Date('2016-01-01')}
+                                initialFocus
                             />
-                            <label htmlFor="same-as-name" className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Nama sama
-                            </label>
-                        </div>
-                    </div>
+                        </PopoverContent>
+                    </Popover>
+                    <InputError message={errors.hire_date} />
                 </div>
 
                 <div className="grid items-start gap-4 sm:grid-cols-2">
@@ -206,15 +97,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                         <Label>
                             Gaji Pokok Harian (Rp)<span className="text-red-600">*</span>
                         </Label>
-                        <Input
-                            value={formatRupiah(data.basic_salary)}
-                            maxLength={8}
-                            onChange={(e) => {
-                                const numericValue = parseInt(e.target.value.replace(/\D/g, '')) || 0;
-                                setData('basic_salary', numericValue);
-                            }}
-                            onKeyDown={createKeyDownHandler(digitPattern)}
-                        />
+                        <Input value={formatRupiah(data.basic_salary)} maxLength={8} onChange={(e) => setData('basic_salary', parseRupiah(e.target.value))} />
                         <InputError message={errors.basic_salary} />
                     </div>
 
@@ -222,15 +105,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                         <Label>
                             Uang Lembur Harian (Rp)<span className="text-red-600">*</span>
                         </Label>
-                        <Input
-                            value={formatRupiah(data.daily_overtime_pay)}
-                            maxLength={8}
-                            onChange={(e) => {
-                                const numericValue = parseInt(e.target.value.replace(/\D/g, '')) || 0;
-                                setData('daily_overtime_pay', numericValue);
-                            }}
-                            onKeyDown={createKeyDownHandler(digitPattern)}
-                        />
+                        <Input value={formatRupiah(data.daily_overtime_pay)} maxLength={8} onChange={(e) => setData('daily_overtime_pay', parseRupiah(e.target.value))} />
                         <InputError message={errors.daily_overtime_pay} />
                     </div>
                 </div>
@@ -239,13 +114,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                     <Label>
                         Jatah Hari Libur<span className="text-red-600">*</span>
                     </Label>
-                    <Input
-                        placeholder="0"
-                        maxLength={2}
-                        value={data.paid_holidays}
-                        onChange={(e) => setData('paid_holidays', e.target.value)}
-                        onKeyDown={createKeyDownHandler(digitPattern)}
-                    />
+                    <Input maxLength={2} value={data.paid_holidays} onChange={(e) => setData('paid_holidays', e.target.value.replace(/[^0-9]/g, ''))} />
                     <InputError message={errors.paid_holidays} />
                 </div>
 
@@ -254,13 +123,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                         <Label>
                             BPJS Kesehatan (%)<span className="text-red-600">*</span>
                         </Label>
-                        <Input
-                            placeholder="0"
-                            maxLength={2}
-                            value={data.bpjs_health}
-                            onChange={(e) => setData('bpjs_health', e.target.value)}
-                            onKeyDown={createKeyDownHandler(digitPattern)}
-                        />
+                        <Input maxLength={2} value={data.bpjs_health} onChange={(e) => setData('bpjs_health', e.target.value.replace(/[^0-9]/g, ''))} />
                         <InputError message={errors.bpjs_health} />
                     </div>
 
@@ -268,13 +131,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                         <Label>
                             BPJS Ketenagakerjaan (%)<span className="text-red-600">*</span>
                         </Label>
-                        <Input
-                            placeholder="0"
-                            maxLength={2}
-                            value={data.bpjs_employment}
-                            onChange={(e) => setData('bpjs_employment', e.target.value)}
-                            onKeyDown={createKeyDownHandler(digitPattern)}
-                        />
+                        <Input maxLength={2} value={data.bpjs_employment} onChange={(e) => setData('bpjs_employment', e.target.value.replace(/[^0-9]/g, ''))} />
                         <InputError message={errors.bpjs_employment} />
                     </div>
 
@@ -282,13 +139,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                         <Label>
                             PPh (%)<span className="text-red-600">*</span>
                         </Label>
-                        <Input
-                            placeholder="0"
-                            maxLength={2}
-                            value={data.income_tax}
-                            onChange={(e) => setData('income_tax', e.target.value)}
-                            onKeyDown={createKeyDownHandler(digitPattern)}
-                        />
+                        <Input maxLength={2} value={data.income_tax} onChange={(e) => setData('income_tax', e.target.value.replace(/[^0-9]/g, ''))} />
                         <InputError message={errors.income_tax} />
                     </div>
                 </div>
@@ -305,20 +156,3 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
         </Modal>
     );
 }
-
-// <div className="grid gap-2">
-//     <Label>
-//         Nama<span className="text-red-600">*</span>
-//     </Label>
-//     <Input
-//         placeholder="Nama"
-//         minLength={3}
-//         maxLength={250}
-//         value={data.user.name}
-//         onChange={(e) =>
-//             setData('user', { ...data.user, name: e.target.value.replace(/\s+/g, ' ').replace(/(\b\w)(\w*)/g, (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()) })
-//         }
-//         onKeyDown={createKeyDownHandler(letterPattern)}
-//     />
-//     <InputError message={errors['user.name']} />
-// </div>

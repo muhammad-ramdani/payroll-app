@@ -44,8 +44,6 @@ export interface User {
     name: string;
     username: string;
     role: string;
-    created_at: string;
-    updated_at: string;
 }
 
 export interface Shift {

@@ -44,7 +44,7 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                         <TableRow>
                             <TableCell>Nomer HP</TableCell>
                             <TableCell>:</TableCell>
-                            <TableCell>{employee.address ? employee.address : '-'}</TableCell>
+                            <TableCell>{employee.phone ? employee.phone : '-'}</TableCell>
                             <TableCell>
                                 <Button variant="outline" size="icon" onClick={() => handleCopy(employee.phone)} hidden={!employee.phone}>
                                     {copied === employee.phone ? <Check /> : <Copy />}

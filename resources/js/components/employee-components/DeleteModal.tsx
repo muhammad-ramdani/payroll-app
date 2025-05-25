@@ -1,5 +1,3 @@
-// sudah disederhanakan
-// DeleteModal.tsx
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,12 +14,8 @@ import { router } from '@inertiajs/react';
 export default function DeleteModal({ open, onClose, deleteEmployee, employee }: DeleteModalProps) {
     const handleDelete = () => {
         if (!employee?.id) return;
-
-        router.delete(route('data-karyawan.destroy', employee.id), {
-            onSuccess: () => {
-                deleteEmployee(employee.id);
-                onClose();
-            },
+        router.delete(`/data-karyawan/${employee.id}`, {
+            onSuccess: () => (deleteEmployee(employee.id), onClose()),
         });
     };
 

@@ -20,12 +20,7 @@ class EmployeeController extends Controller
     {
         $rules = [
             'user.name' => 'required|string|max:250',
-            'phone' => 'nullable|string|max:25',
-            'address' => 'nullable|string|max:255',
             'hire_date' => 'required|date',
-            'bank_name' => 'nullable|string|max:255',
-            'account_number' => 'nullable|string|max:255',
-            'account_name' => 'nullable|string|max:255',
             'basic_salary' => 'required|numeric|min:1',
             'paid_holidays' => 'required|integer|min:0|max:31',
             'daily_overtime_pay' => 'required|numeric|min:1',
@@ -52,7 +47,7 @@ class EmployeeController extends Controller
         $user = User::create([
             'id' => $validated['id'],
             'name' => $validated['user']['name'],
-            'username' => $validated['user']['username'], // Ambil dari frontend
+            'username' => $validated['user']['username'],
             'password' => Hash::make('password'),
             'role' => 'karyawan',
         ]);

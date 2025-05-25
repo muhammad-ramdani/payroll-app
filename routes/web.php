@@ -58,10 +58,10 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('perhitungan-penggajian/paid/{payroll}', [PayrollCalculationController::class, 'paid']);
         Route::patch('perhitungan-penggajian/calculate/{payroll}', [PayrollCalculationController::class, 'calculate']);
 
-        Route::get('data-karyawan', [EmployeeController::class, 'index'])->name('data-karyawan.index');
-        Route::post('data-karyawan', [EmployeeController::class, 'store'])->name('data-karyawan.store');
-        Route::patch('data-karyawan/{employee}', [EmployeeController::class, 'update'])->name('data-karyawan.update');
-        Route::delete('data-karyawan/{employee}', [EmployeeController::class, 'destroy'])->name('data-karyawan.destroy');
+        Route::get('data-karyawan', [EmployeeController::class, 'index']);
+        Route::post('data-karyawan', [EmployeeController::class, 'store']);
+        Route::patch('data-karyawan/{employee}', [EmployeeController::class, 'update']);
+        Route::delete('data-karyawan/{employee}', [EmployeeController::class, 'destroy']);
     });
 
     Route::get('penggajian/pdf/{id}', [PayrollSlipPDFController::class, 'index']);

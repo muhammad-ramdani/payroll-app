@@ -42,7 +42,7 @@ export default function DataKaryawan() {
             },
             {
                 header: 'Telepon',
-                cell: ({ row }) => <div>{row.original.phone}</div>,
+                cell: ({ row }) => <div>{row.original.phone ?? '-'}</div>,
             },
             {
                 header: 'Aksi',

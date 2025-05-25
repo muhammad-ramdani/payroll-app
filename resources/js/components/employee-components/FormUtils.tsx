@@ -1,22 +1,6 @@
 // FormUtils.tsx
 import { Employee } from '@/types';
 import { useForm } from '@inertiajs/react';
-import React from 'react';
-
-export const allowedKeys = ['Backspace', 'ArrowLeft', 'ArrowRight', 'Tab', 'Delete', 'Shift', 'PageUp', 'PageDown', 'Fn', 'Enter'];
-
-export const letterPattern = /^[a-zA-Z .'-]$/;
-export const phonePattern = /^[0-9 ()+-]$/;
-export const accountPattern = /^[0-9 -]$/;
-export const digitPattern = /^[0-9]$/;
-
-export function createKeyDownHandler(pattern: RegExp) {
-    return (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!pattern.test(e.key) && !allowedKeys.includes(e.key)) {
-            e.preventDefault();
-        }
-    };
-}
 
 export const useFormEmployee = () => {
     return useForm<Employee>({
@@ -26,8 +10,6 @@ export const useFormEmployee = () => {
             name: '',
             username: '',
             role: '',
-            created_at: '',
-            updated_at: '',
         },
         phone: '',
         address: '',
@@ -43,6 +25,11 @@ export const useFormEmployee = () => {
         income_tax: '',
     });
 };
+
 export function formatRupiah(value: number): string {
     return new Intl.NumberFormat('id-ID').format(value);
+}
+
+export function parseRupiah(rupiahString: string): number {
+    return parseInt(rupiahString.replace(/[^0-9]/g, '')) || 0;
 }
