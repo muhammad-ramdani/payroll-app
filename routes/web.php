@@ -4,17 +4,16 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PayrollCalculationController;
-use App\Http\Controllers\PayrollReportController;
-use App\Http\Controllers\AttendanceMonitoringController;
-use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ShiftForAdminController;
 use App\Http\Controllers\AttendanceRuleSettingController;
 use App\Http\Controllers\ShiftSwapController;
-use App\Http\Controllers\AttendanceRecapController;
 use App\Http\Controllers\ShiftForEmployeeController;
 use App\Http\Controllers\PayrollSlipPDFController;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
+use App\Models\Attendance;
+use App\Models\Payroll;
+use App\Models\User;
 use Inertia\Inertia;
 
 Route::middleware(['auth'])->group(function () {
@@ -32,9 +31,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('permintaan-tukar-shift/{id}/approve', [ShiftSwapController::class, 'approveSwap'])->name('permintaan-tukar-shift.approve');
         Route::post('permintaan-tukar-shift/{id}/reject', [ShiftSwapController::class, 'rejectSwap'])->name('permintaan-tukar-shift.reject');
 
-        Route::get('rekap-absensi', [AttendanceRecapController::class, 'index']);
+        Route::get('rekap-absensi', function () {
+            return Inertia::render('AttendanceRecapPage', ['attendances' => Attendance::with('user')->where('user_id', auth()->id())->orderBy('date', 'desc')->get()]);
+        });
 
-        Route::get('laporan-absensi-karyawan', [AttendanceReportController::class, 'employee']);
+        Route::get('laporan-absensi-karyawan', function () {
+            return Inertia::render('AttendanceReportForEmployeePage', ['attendances' => Attendance::with('user')->where('user_id', auth()->id())->get()]);
+        });
     });
 
     Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
@@ -42,11 +45,21 @@ Route::middleware(['auth'])->group(function () {
             return Inertia::render('DashboardPage');
         })->name('dashboard');
 
-        Route::get('monitoring-absensi', [AttendanceMonitoringController::class, 'index']);
+        Route::get('monitoring-absensi', function () {
+            return Inertia::render('AttendanceMonitoringPage', [
+                'monitoring_attendances' => Attendance::with('user')->orderBy('shift_type', 'asc')->orderBy(User::select('name')->whereColumn('users.id', 'attendances.user_id'), 'asc')->get()
+            ]);
+        });
 
-        Route::get('laporan-absensi-admin', [AttendanceReportController::class, 'admin']);
+        Route::get('laporan-absensi-admin', function () {
+            return Inertia::render('AttendanceReportForAdminPage', [
+                'attendances' => Attendance::with('user')->orderBy(User::select('name')->whereColumn('users.id', 'attendances.user_id'), 'asc')->get()
+            ]);
+        });
 
-        Route::get('laporan-penggajian', [PayrollReportController::class, 'index']);
+        Route::get('laporan-penggajian', function () {
+            return Inertia::render('PayrollReportPage', ['payrolls' => Payroll::get()]);
+        });
 
         Route::get('admin-shift-karyawan', [ShiftForAdminController::class, 'index']);
         Route::patch('admin-shift-karyawan/{user}', [ShiftForAdminController::class, 'update']);

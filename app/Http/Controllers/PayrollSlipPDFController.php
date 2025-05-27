@@ -14,7 +14,6 @@ class PayrollSlipPDFController extends Controller
     {
         $payroll = Payroll::with('user.employee')->findOrFail($id);
 
-        // Authorization check yang diperbaiki
         $user = auth()->user();
         if ($user->role !== 'admin' && $payroll->user_id !== $user->id) {
             abort(403);
