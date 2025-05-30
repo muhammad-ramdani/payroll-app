@@ -32,6 +32,7 @@ return new class extends Migration
             // Komponen penghasilan
             $table->unsignedMediumInteger('basic_salary')->nullable();
             $table->unsignedMediumInteger('daily_overtime_pay')->nullable();
+            $table->unsignedMediumInteger('transportation_allowance')->nullable();
             $table->unsignedMediumInteger('total_basic_salary')->nullable();
             $table->unsignedMediumInteger('total_overtime_pay')->nullable();
             $table->unsignedMediumInteger('gross_salary')->nullable();

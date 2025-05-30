@@ -70,7 +70,7 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
                     <InputError message={errors['user.name']} />
                 </div>
 
-                <div className="grid items-start gap-4 sm:grid-cols-2">
+                <div className="grid items-start gap-4 sm:grid-cols-3">
                     <div className="grid gap-2">
                         <Label>Shift Kerja</Label>
                         <Select value={data.shift_type} onValueChange={(value) => setData('shift_type', value as 'Pagi' | 'Siang')}>
@@ -106,6 +106,15 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
                         </Popover>
                         <InputError message={errors.hire_date} />
                     </div>
+
+                    <div className="grid gap-2">
+                        <Label>Jatah Hari Libur</Label>
+                        <div className="relative">
+                            <Input maxLength={2} value={data.paid_holidays || 0} onChange={(e) => setData('paid_holidays', parseNumber(e.target.value))} />
+                            <span className="absolute top-2 right-3">Hari</span>
+                        </div>
+                        <InputError message={errors.paid_holidays} />
+                    </div>
                 </div>
 
                 <div className="grid items-start gap-4 sm:grid-cols-3">
@@ -122,12 +131,9 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Jatah Hari Libur</Label>
-                        <div className="relative">
-                            <Input maxLength={2} value={data.paid_holidays || 0} onChange={(e) => setData('paid_holidays', parseNumber(e.target.value))} />
-                            <span className="absolute top-2 right-3">Hari</span>
-                        </div>
-                        <InputError message={errors.paid_holidays} />
+                        <Label>Tunjangan Transportasi</Label>
+                        <Input value={formatRupiah(data.transportation_allowance)} maxLength={11} onChange={(e) => setData('transportation_allowance', parseRupiah(e.target.value))} />
+                        <InputError message={errors.transportation_allowance} />
                     </div>
                 </div>
 

@@ -26,6 +26,7 @@ class Payroll extends Model
         'total_bonus',
         'total_penalty',
         'basic_salary',
+        'transportation_allowance',
         'daily_overtime_pay',
         'total_basic_salary',
         'total_overtime_pay',

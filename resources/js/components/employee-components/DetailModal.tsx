@@ -101,7 +101,7 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                             </TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableCell>Jatah Hari Libur (Bonus)</TableCell>
+                            <TableCell>Jatah Hari Libur</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell colSpan={2}>{employee.paid_holidays} hari</TableCell>
                         </TableRow>
@@ -114,6 +114,18 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                                     currency: 'IDR',
                                     maximumFractionDigits: 0,
                                 }).format(employee.daily_overtime_pay)}
+                            </TableCell>
+                            <TableCell className="h-13"></TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>Tunjangan Transportasi</TableCell>
+                            <TableCell>:</TableCell>
+                            <TableCell>
+                                {new Intl.NumberFormat('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                    maximumFractionDigits: 0,
+                                }).format(employee.transportation_allowance)}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRow>

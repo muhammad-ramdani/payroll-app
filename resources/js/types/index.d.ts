@@ -75,6 +75,7 @@ export interface Employee {
     account_name: string;
     basic_salary: number;
     paid_holidays: number;
+    transportation_allowance: number;
     daily_overtime_pay: number;
     bpjs_health: number;
     bpjs_employment: number;
@@ -98,6 +99,7 @@ export interface Payroll {
     total_penalty: number;
     basic_salary: number;
     daily_overtime_pay: number;
+    transportation_allowance: number;
     total_basic_salary: number;
     total_overtime_pay: number;
     gross_salary: number;

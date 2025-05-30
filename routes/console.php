@@ -129,9 +129,10 @@ Schedule::call(function () {
         // [7] Hitung komponen gaji
         $grossSalary = (
             (($counters['total_attendance'] + $employee->paid_holidays) * $employee->basic_salary) + // Gaji pokok
-            ($counters['total_overtime'] * $employee->daily_overtime_pay) +                         // Lembur
-            ($counters['total_punctual'] * $bonusPenalty->bonus_amount) -                          // Bonus
-            ($counters['total_late'] * $bonusPenalty->penalty_amount)                              // Potongan
+            ($counters['total_overtime'] * $employee->daily_overtime_pay) +                          // Lembur
+            $employee->transportation_allowance +                                                    // Tunjangan transportasi
+            ($counters['total_punctual'] * $bonusPenalty->bonus_amount) -                            // Bonus
+            ($counters['total_late'] * $bonusPenalty->penalty_amount)                                // Potongan
         );
 
         // [8] Hitung potongan
@@ -160,6 +161,7 @@ Schedule::call(function () {
             // Komponen gaji
             'basic_salary' => $employee->basic_salary,
             'daily_overtime_pay' => $employee->daily_overtime_pay,
+            'transportation_allowance' => $employee->transportation_allowance,
             'total_basic_salary' => ($counters['total_attendance'] + $employee->paid_holidays) * $employee->basic_salary,
             'total_overtime_pay' => $counters['total_overtime'] * $employee->daily_overtime_pay,
             

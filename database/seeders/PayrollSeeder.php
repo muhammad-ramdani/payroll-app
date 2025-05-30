@@ -120,6 +120,8 @@ class PayrollSeeder extends Seeder
                     $basicSalary = $employee->basic_salary;
                     // Upah lembur per hari
                     $overtimePay = $employee->daily_overtime_pay;
+                    // Total tunjangan transportasi
+                    $transportationAllowance = $employee->transportation_allowance;
                     
                     // Total gaji pokok = (hari kerja + libur berbayar) * gaji pokok
                     $totalBasic = ($totalAttendanceDays + $employee->paid_holidays) * $basicSalary;
@@ -134,7 +136,7 @@ class PayrollSeeder extends Seeder
                     $totalPenalty = $totalLateDays * $bonusPenaltySettings->penalty_amount;
                     
                     // Gaji kotor = total pokok + lembur + bonus - potongan
-                    $grossSalary = $totalBasic + $totalOvertime + $totalBonus - $totalPenalty;
+                    $grossSalary = $totalBasic + $totalOvertime + $transportationAllowance + $totalBonus - $totalPenalty;
                     
                     /* 
                      * [4] HITUNG POTONGAN 
@@ -163,6 +165,7 @@ class PayrollSeeder extends Seeder
                         'total_penalty' => $totalPenalty,
                         'basic_salary' => $basicSalary,
                         'daily_overtime_pay' => $overtimePay,
+                        'transportation_allowance' => $transportationAllowance,
                         'total_basic_salary' => $totalBasic,
                         'total_overtime_pay' => $totalOvertime,
                         'gross_salary' => $grossSalary,

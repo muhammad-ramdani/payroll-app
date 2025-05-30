@@ -21,9 +21,10 @@ class EmployeeController extends Controller
         $rules = [
             'user.name' => 'required|string|max:250',
             'hire_date' => 'required|date',
-            'basic_salary' => 'required|numeric',
+            'basic_salary' => 'required|integer',
             'paid_holidays' => 'required|integer|max:31',
-            'daily_overtime_pay' => 'required|numeric',
+            'transportation_allowance' => 'required|integer',
+            'daily_overtime_pay' => 'required|integer',
             'bpjs_health' => 'required|integer|max:100',
             'bpjs_employment' => 'required|integer|max:100',
             'income_tax' => 'required|integer|max:100',
@@ -69,6 +70,7 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate($this->validationRules(true));
         $employee->user()->update($validated['user']);
+        $employee->update($validated);
     }
 
     public function destroy(Employee $employee)

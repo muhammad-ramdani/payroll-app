@@ -63,7 +63,7 @@ class PayrollCalculationController extends Controller
         $totalOvertimePay    = $count['overtimeDays'] * $employee->daily_overtime_pay;
         $totalBonus          = $count['punctualDays'] * $bonusPenaltySetting->bonus_amount;
         $totalPenalty        = $count['lateDays'] * $bonusPenaltySetting->penalty_amount;
-        $grossSalary         = $totalBasicSalary + $totalOvertimePay + $totalBonus - $totalPenalty;
+        $grossSalary         = $totalBasicSalary + $totalOvertimePay + $employee->transportation_allowance + $totalBonus - $totalPenalty;
 
         $deductionPercent    = $employee->bpjs_health + $employee->bpjs_employment + $employee->income_tax;
         $totalDeductions     = round(($deductionPercent / 100) * $grossSalary);
@@ -81,6 +81,7 @@ class PayrollCalculationController extends Controller
             'total_penalty'              => $totalPenalty,
             'basic_salary'               => $employee->basic_salary,
             'daily_overtime_pay'         => $employee->daily_overtime_pay,
+            'transportation_allowance'   => $employee->transportation_allowance,
             'total_basic_salary'         => $totalBasicSalary,
             'total_overtime_pay'         => $totalOvertimePay,
             'gross_salary'               => $grossSalary,

@@ -98,6 +98,8 @@ export default function DetailModal({ open, onClose, payroll }: PayrollModalProp
                             <span className="text-yellow-500"> + </span>
                             Total Gaji Lembur
                             <span className="text-yellow-500"> + </span>
+                            Tunjangan Transportasi
+                            <span className="text-yellow-500"> + </span>
                             Total Bonus Tepat Waktu
                             <span className="text-yellow-500"> - </span>
                             Total Potongan Telat
@@ -105,6 +107,8 @@ export default function DetailModal({ open, onClose, payroll }: PayrollModalProp
                             Rp {payroll.total_basic_salary.toLocaleString('id-ID')}
                             <span className="text-yellow-500"> + </span>
                             Rp {payroll.total_overtime_pay.toLocaleString('id-ID')}
+                            <span className="text-yellow-500"> + </span>
+                            Rp {payroll.transportation_allowance.toLocaleString('id-ID')}
                             <span className="text-yellow-500"> + </span>
                             Rp {payroll.total_bonus.toLocaleString('id-ID')}
                             <span className="text-yellow-500"> - </span>
