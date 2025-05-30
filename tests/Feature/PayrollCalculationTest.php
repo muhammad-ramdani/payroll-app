@@ -20,7 +20,7 @@ test('user yang terautentikasi role admin dapat mengakses halaman perhitungan pe
 test('user yang terautentikasi role karyawan tidak dapat mengakses halaman perhitungan penggajian', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'karyawan']));
 
-    $this->get('/perhitungan-penggajian')->assertRedirect('/absensi');
+    $this->get('/perhitungan-penggajian')->assertRedirect('/presensi');
 });
 
 test('admin dapat menghitung penggajian karyawan', function () {

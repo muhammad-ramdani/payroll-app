@@ -24,5 +24,5 @@ test('user yang terautentikasi dengan role karyawan tidak dapat mengakses halama
     $this->actingAs($karyawan);
 
     // Pastikan pengguna dengan role karyawan diarahkan ke dashboard
-    $this->get('/dashboard')->assertRedirect('/absensi');
+    $this->get('/dashboard')->assertRedirect('/presensi');
 });

@@ -115,7 +115,7 @@ export default function PayrollCalculationPage({ payrolls }: Props) {
                 cell: ({ row }) => (row.original.net_salary ? <span className="text-nowrap">Rp {row.original.net_salary.toLocaleString('id-ID')}</span> : '-'),
             },
             {
-                header: 'Status',
+                header: 'Status Gaji',
                 cell: ({ row }) => {
                     const [label, color] = salaryStatus[row.original.salary_status];
                     return <Badge className={color}>{label}</Badge>;
@@ -141,10 +141,10 @@ export default function PayrollCalculationPage({ payrolls }: Props) {
                             <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleCalculate(row.original.id)} hidden={row.original.salary_status !== 'uncalculated'}>
-                                Hitung
+                                Hitung Gaji
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleCalculate(row.original.id)} hidden={row.original.salary_status !== 'unpaid'}>
-                                Perbarui
+                                Perbarui Hitung Gaji
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => {
@@ -153,7 +153,7 @@ export default function PayrollCalculationPage({ payrolls }: Props) {
                                 }}
                                 hidden={row.original.salary_status === 'uncalculated'}
                             >
-                                Lihat Detail
+                                Lihat Detail Gaji
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => {
@@ -162,7 +162,7 @@ export default function PayrollCalculationPage({ payrolls }: Props) {
                                 }}
                                 hidden={row.original.salary_status !== 'unpaid'}
                             >
-                                Tandai Sudah Dibayar
+                                Tandai Gaji Sudah Dibayar
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => window.open(`/penggajian/pdf/${row.original.id}`, '_blank')} hidden={row.original.confirmation_status !== 'received'}>
                                 Slip Gaji

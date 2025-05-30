@@ -2,7 +2,6 @@
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { calculateDistance, getCurrentPosition } from '@/utils/geolocation';
 import { Head, router } from '@inertiajs/react';
-import { ClockArrowDown, ClockArrowUp } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 // Komponen UI Kustom
@@ -12,6 +11,7 @@ import AppLayout from '@/layouts/app-layout';
 
 // Tipe Data dan Konstanta
 import { Attendance, AttendanceBonusPenaltySetting, AttendanceRule } from '@/types';
+import { ClockArrowDown, ClockArrowUp } from 'lucide-react';
 
 const calculateWorkingDuration = (clockInTime?: string | null, clockOutTime?: string | null, now = Date.now()): string => {
     if (!clockInTime) return '-';
@@ -70,7 +70,7 @@ export default function AttendancePage({
     }, [attendances]);
 
     const handleUpdateAttendance = useCallback((id: number, action: 'clock_in' | 'clock_out' | 'leave' | 'sick') => {
-        router.patch(`/absensi/${id}`, { action });
+        router.patch(`/presensi/${id}`, { action });
     }, []);
 
     const handleAttendanceAction = useCallback(
@@ -105,12 +105,12 @@ export default function AttendancePage({
     );
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Absensi Karyawan', href: '/' }]}>
-            <Head title="Absensi Karyawan" />
+        <AppLayout breadcrumbs={[{ title: 'Presensi', href: '/' }]}>
+            <Head title="Presensi" />
             {attendanceRecords.length === 0 ? (
                 // Tampilan ketika tidak ada data
                 <div className="flex h-9/10 items-center justify-center">
-                    <p className="text-muted-foreground text-sm">Absensi baru akan tersedia pukul 06:30 pagi.</p>
+                    <p className="text-muted-foreground text-sm">Presensi baru akan tersedia pukul 06:30 pagi.</p>
                 </div>
             ) : (
                 <>
@@ -122,7 +122,7 @@ export default function AttendancePage({
 
                                 {/* Shift */}
                                 <div className="text-sm">
-                                    Shift
+                                    Shift kamu hari ini
                                     <span className={`${record.shift_type === 'Pagi' ? 'text-blue-500' : 'text-yellow-500'}`}> {record.shift_type}</span>
                                 </div>
 
@@ -135,7 +135,7 @@ export default function AttendancePage({
                                         <p className="text-sm font-medium">{record.clock_in}</p>
                                     ) : (
                                         <Button variant="secondary" onClick={() => handleAttendanceAction('clock_in', record.id)}>
-                                            <ClockArrowDown className="mx-11" />
+                                            <ClockArrowDown /> Masuk Kerja
                                         </Button>
                                     )}
                                 </div>
@@ -149,7 +149,7 @@ export default function AttendancePage({
                                         <p className="text-sm font-medium">{record.clock_out}</p>
                                     ) : (
                                         <Button variant="secondary" disabled={!record.clock_in} onClick={() => handleAttendanceAction('clock_out', record.id)}>
-                                            <ClockArrowUp className="mx-11" />
+                                            <ClockArrowUp /> Pulang Kerja
                                         </Button>
                                     )}
                                 </div>
@@ -167,25 +167,26 @@ export default function AttendancePage({
                                 </div>
 
                                 {/* tombol tidak masuk */}
-                                <div className="space-x-4">
-                                    {record.status === 'not_started' && (
-                                        <Button
-                                            className="mt-8 border border-fuchsia-500 bg-transparent text-fuchsia-500 hover:bg-fuchsia-500/15"
-                                            onClick={() => handleUpdateAttendance(record.id, 'sick')}
-                                        >
-                                            Libur Sakit
-                                        </Button>
-                                    )}
+                                {record.status === 'not_started' && (
+                                    <div className="space-y-4 pt-8">
+                                        <p className="text-muted-foreground text-sm">Tombol Libur Kerja</p>
+                                        <div className="space-x-4">
+                                            <Button
+                                                className="border border-fuchsia-500 bg-transparent text-fuchsia-500 hover:bg-fuchsia-500/15"
+                                                onClick={() => handleUpdateAttendance(record.id, 'sick')}
+                                            >
+                                                Libur Sakit
+                                            </Button>
 
-                                    {record.status === 'not_started' && (
-                                        <Button
-                                            className="mt-8 border border-rose-500 bg-transparent text-rose-500 hover:bg-rose-500/15"
-                                            onClick={() => handleUpdateAttendance(record.id, 'leave')}
-                                        >
-                                            Libur Cuti
-                                        </Button>
-                                    )}
-                                </div>
+                                            <Button
+                                                className="border border-rose-500 bg-transparent text-rose-500 hover:bg-rose-500/15"
+                                                onClick={() => handleUpdateAttendance(record.id, 'leave')}
+                                            >
+                                                Libur Cuti
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -193,7 +194,7 @@ export default function AttendancePage({
                     <div className="text-muted-foreground mx-4 mt-32 mb-4 space-y-2">
                         <p className="text-sm font-semibold">Catatan:</p>
                         <ul className="ml-5 list-disc space-y-1 text-sm">
-                            <li>absensi Kehadiran "Jam Masuk" dan "Jam Pulang" hanya bisa dilakukan di toko saja, kecuali tombol "Tidak Masuk Kerja" bisa dilakukan dimana saja.</li>
+                            <li>Presensi Kehadiran "Jam Masuk" dan "Jam Pulang" hanya bisa dilakukan di toko saja, kecuali "Tombol Libur Kerja" bisa dilakukan dimana saja.</li>
                             <li>Jika sampai jam 14:00 tidak menekan tombol "Jam Masuk", maka status kehadiran akan otomatis menjadi "Tidak Masuk".</li>
                             <li>
                                 Bagi karyawan shift Pagi, jika masuk sebelum pukul {attendanceRules[1].punctual_end}, akan mendapatkan bonus sebesar Rp{' '}

@@ -18,18 +18,22 @@ export const useFormEmployee = () => {
         account_number: '',
         account_name: '',
         basic_salary: 0,
-        paid_holidays: '',
+        paid_holidays: 0,
         daily_overtime_pay: 0,
-        bpjs_health: '',
-        bpjs_employment: '',
-        income_tax: '',
+        bpjs_health: 0,
+        bpjs_employment: 0,
+        income_tax: 0,
     });
 };
 
-export function formatRupiah(value: number): string {
-    return new Intl.NumberFormat('id-ID').format(value);
+export function formatRupiah(value: number) {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
 }
 
-export function parseRupiah(rupiahString: string): number {
-    return parseInt(rupiahString.replace(/[^0-9]/g, '')) || 0;
+export function parseRupiah(value: string) {
+    return parseInt(value.replace(/\D/g, '')) || 0;
+}
+
+export function parseNumber(value: string) {
+    return parseInt(value.replace(/\D/g, '')) || 0;
 }

@@ -15,5 +15,5 @@ test('user yang terautentikasi role admin dapat mengakses halaman laporan pengga
 test('user yang terautentikasi role karyawan tidak dapat mengakses halaman laporan penggajian', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'karyawan']));
 
-    $this->get('/laporan-penggajian')->assertRedirect('/absensi');
+    $this->get('/laporan-penggajian')->assertRedirect('/presensi');
 });

@@ -4,23 +4,23 @@ use App\Models\User;
 use App\Models\AttendanceBonusPenaltySetting;
 use App\Models\AttendanceRuleSetting;
 
-test('user yang belum login tidak dapat mengakses halaman Aturan Absensi', function () {
-    $this->get('/aturan-absensi')->assertRedirect('/');
+test('user yang belum login tidak dapat mengakses halaman Aturan Presensi', function () {
+    $this->get('/aturan-presensi')->assertRedirect('/');
 });
 
-test('user yang terautentikasi role admin dapat mengakses halaman Aturan Absensi', function () {
+test('user yang terautentikasi role admin dapat mengakses halaman Aturan Presensi', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'admin']));
 
-    $this->get('/aturan-absensi')->assertOk();
+    $this->get('/aturan-presensi')->assertOk();
 });
 
-test('user yang terautentikasi role karyawan tidak dapat mengakses halaman Aturan Absensi', function () {
+test('user yang terautentikasi role karyawan tidak dapat mengakses halaman Aturan Presensi', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'karyawan']));
 
-    $this->get('/aturan-absensi')->assertRedirect('/absensi');
+    $this->get('/aturan-presensi')->assertRedirect('/presensi');
 });
 
-test('admin dapat mengupdate Aturan Absensi', function () {
+test('admin dapat mengupdate Aturan Presensi', function () {
     // Buat data dummy yang akan diupdate
     $bonusPenalty = AttendanceBonusPenaltySetting::factory()->create();
     $rule1 = AttendanceRuleSetting::factory()->create(['id' => 1, 'attendance_bonus_penalty_id' => $bonusPenalty->id]);
@@ -51,7 +51,7 @@ test('admin dapat mengupdate Aturan Absensi', function () {
 
     // Kirim request dan assert status OK (200)
     $this->actingAs($user)
-        ->patch('/aturan-absensi', $payload)
+        ->patch('/aturan-presensi', $payload)
         ->assertOk(); // Controller tidak return redirect, sehingga assertOk()
 
     // Assert data di database telah berubah

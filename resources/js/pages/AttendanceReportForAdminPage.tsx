@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function AttendanceReportForAdminPage({ attendances }: Props) {
-    // Memo: Daftar unik karyawan dari data absensi
+    // Memo: Daftar unik karyawan dari data Presensi
     const employees = useMemo(() => {
         const uniqueEmployees = new Map<string, User>();
         attendances.forEach((attendance) => {
@@ -22,7 +22,7 @@ export default function AttendanceReportForAdminPage({ attendances }: Props) {
         return Array.from(uniqueEmployees.values()).sort((a, b) => a.name.localeCompare(b.name));
     }, [attendances]);
 
-    // Memo: Daftar tahun unik dari data absensi (diurutkan descending)
+    // Memo: Daftar tahun unik dari data Presensi (diurutkan descending)
     const availableYears = useMemo(() => {
         const years = new Set<number>();
         attendances.forEach((attendance) => {
@@ -50,7 +50,7 @@ export default function AttendanceReportForAdminPage({ attendances }: Props) {
             sick: 0,
         }));
 
-        // Filter data absensi sesuai kriteria
+        // Filter data Presensi sesuai kriteria
         const filteredAttendances = attendances.filter((attendance) => {
             const attendanceYear = new Date(attendance.date).getFullYear();
             return attendance.user.id === selectedEmployeeId && attendanceYear === selectedYear;
@@ -64,7 +64,7 @@ export default function AttendanceReportForAdminPage({ attendances }: Props) {
 
                 // Hitung lembur jika ada clock_in dan clock_out
                 if (attendance.clock_in && attendance.clock_out) {
-                    // Gabungkan tanggal absensi dengan jam clock-in/out
+                    // Gabungkan tanggal Presensi dengan jam clock-in/out
                     const clockIn = new Date(`${attendance.date}T${attendance.clock_in}`);
                     const clockOut = new Date(`${attendance.date}T${attendance.clock_out}`);
 
@@ -90,12 +90,12 @@ export default function AttendanceReportForAdminPage({ attendances }: Props) {
         finished: { label: 'Hadir', color: '#3B82F6' },
         overtime: { label: 'Lembur', color: '#10B981' },
         leave: { label: 'Libur Cuti', color: '#F43F5E' },
-        sick: { label: 'ibur Sakit', color: '#D946EF' },
+        sick: { label: 'Libur Sakit', color: '#D946EF' },
     } satisfies ChartConfig;
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Laporan Absensi', href: '/' }]}>
-            <Head title="Laporan Absensi" />
+        <AppLayout breadcrumbs={[{ title: 'Laporan Presensi', href: '/' }]}>
+            <Head title="Laporan Presensi" />
 
             <div className="m-4 space-y-4">
                 {/* Section: Filter Kontrol */}

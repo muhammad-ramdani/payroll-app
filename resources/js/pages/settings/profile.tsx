@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { toast } from 'sonner';
 
 export default function Profile({ auth }: SharedData) {
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
@@ -20,16 +21,16 @@ export default function Profile({ auth }: SharedData) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        patch(route('profile.update'));
+        patch(route('profile-akun.update'), { onSuccess: () => toast.success('Profil akun berhasil diubah', { action: { label: 'Tutup', onClick: () => {} } }) });
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Profile settings', href: '/settings/profile' }]}>
-            <Head title="Profile settings" />
+        <AppLayout breadcrumbs={[{ title: 'Pengaturan profil akun', href: '/' }]}>
+            <Head title="Pengaturan profile akun" />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Info Profile" description="Ubah nama sama username kamu" />
+                    <HeadingSmall title="Profil Akun" description="Ubah nama sama username kamu" />
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-3">

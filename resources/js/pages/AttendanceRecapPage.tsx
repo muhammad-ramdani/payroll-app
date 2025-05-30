@@ -67,7 +67,7 @@ const AttendanceStatusBadge = ({ status }: { status: Attendance['status'] }) => 
     return <Badge className={className}>{label}</Badge>;
 };
 
-// Komponen Utama: Absensi Karyawan
+// Komponen Utama: Presensi Karyawan
 // -----------------------------------------------------------------------------
 export default function AttendanceRecapPage() {
     // Inisialisasi Data dan State Dasar
@@ -185,41 +185,45 @@ export default function AttendanceRecapPage() {
     // Render UI
     // -------------------------------------------------------------------------
     return (
-        <AppLayout breadcrumbs={[{ title: 'Rekap Absensi', href: '/' }]}>
-            <Head title="Rekap Absensi" />
+        <AppLayout breadcrumbs={[{ title: 'Rekap Presensi', href: '/' }]}>
+            <Head title="Rekap Presensi" />
 
             {/* Konten Utama */}
             <div className="overflow-x-auto p-4">
                 {/* Kontrol Filter Bulan dan Tahun */}
                 <div className="mb-4 flex gap-4">
-                    <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                        <SelectTrigger className="sm:w-40">
-                            <SelectValue placeholder="Pilih Bulan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {uniqueMonths.map((month) => (
-                                <SelectItem key={month} value={month.toString()}>
-                                    {new Date(0, month).toLocaleDateString('id-ID', { month: 'long' })}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    {uniqueMonths.length > 0 && (
+                        <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
+                            <SelectTrigger className="sm:w-40">
+                                <SelectValue placeholder="Pilih Bulan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {uniqueMonths.map((month) => (
+                                    <SelectItem key={month} value={month.toString()}>
+                                        {new Date(0, month).toLocaleDateString('id-ID', { month: 'long' })}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
 
-                    <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                        <SelectTrigger className="sm:w-40">
-                            <SelectValue placeholder="Pilih Tahun" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {uniqueYears.map((year) => (
-                                <SelectItem key={year} value={year.toString()}>
-                                    {year}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    {uniqueYears.length > 0 && (
+                        <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+                            <SelectTrigger className="sm:w-40">
+                                <SelectValue placeholder="Pilih Tahun" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {uniqueYears.map((year) => (
+                                    <SelectItem key={year} value={year.toString()}>
+                                        {year}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
 
-                {/* Tabel Data Absensi */}
+                {/* Tabel Data Presensi */}
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader>
@@ -233,13 +237,21 @@ export default function AttendanceRecapPage() {
                         </TableHeader>
 
                         <TableBody>
-                            {attendanceTable.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                                    ))}
+                            {attendanceTable.getRowModel().rows.length > 0 ? (
+                                attendanceTable.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={100} className="text-muted-foreground h-24 text-center">
+                                        Anda belum pernah melakukan presensi
+                                    </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 </div>

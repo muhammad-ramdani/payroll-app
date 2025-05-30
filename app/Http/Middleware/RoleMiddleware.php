@@ -17,7 +17,7 @@ class RoleMiddleware
         if ($request->user()->role === 'admin') {
             return redirect()->route('dashboard');
         } else {
-            return redirect()->route('absensi');
+            return redirect()->route('presensi');
         }
     }
 }

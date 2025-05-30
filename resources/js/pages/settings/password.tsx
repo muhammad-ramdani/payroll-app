@@ -8,6 +8,7 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 export default function Password() {
     const passwordInput = useRef<HTMLInputElement>(null);
@@ -23,7 +24,7 @@ export default function Password() {
         e.preventDefault();
 
         put(route('password.update'), {
-            onSuccess: () => reset(),
+            onSuccess: () => (reset(), toast.success('Password berhasil diubah', { action: { label: 'Tutup', onClick: () => {} } })),
             onError: (errors) => {
                 if (errors.password) {
                     reset('password', 'password_confirmation');
@@ -39,29 +40,29 @@ export default function Password() {
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Password settings', href: '/settings/password' }]}>
-            <Head title="Profile settings" />
+        <AppLayout breadcrumbs={[{ title: 'Pengaturan password', href: '/settings/password' }]}>
+            <Head title="Pengaturan password" />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Update password" description="Pastikan akunmu pake password yang panjang sama acak biar aman" />
+                    <HeadingSmall title="Ganti password" description="Pastikan akunmu pake password yang panjang sama acak biar aman" />
 
                     <form onSubmit={updatePassword} className="space-y-6">
                         <div className="grid gap-3">
-                            <Label>Current password</Label>
-                            <Input ref={currentPasswordInput} value={data.current_password} onChange={(e) => setData('current_password', e.target.value)} type="password" />
+                            <Label>Password saat ini</Label>
+                            <Input ref={currentPasswordInput} value={data.current_password} onChange={(e) => setData('current_password', e.target.value)} type="password" required />
                             <InputError message={errors.current_password} />
                         </div>
 
                         <div className="grid gap-3">
-                            <Label>New password</Label>
-                            <Input ref={passwordInput} value={data.password} onChange={(e) => setData('password', e.target.value)} type="password" />
+                            <Label>Password baru</Label>
+                            <Input ref={passwordInput} value={data.password} onChange={(e) => setData('password', e.target.value)} type="password" required />
                             <InputError message={errors.password} />
                         </div>
 
                         <div className="grid gap-3">
-                            <Label>Confirm password</Label>
-                            <Input value={data.password_confirmation} onChange={(e) => setData('password_confirmation', e.target.value)} type="password" />
+                            <Label>Konfirmasi password baru</Label>
+                            <Input value={data.password_confirmation} onChange={(e) => setData('password_confirmation', e.target.value)} type="password" required />
                             <InputError message={errors.password_confirmation} />
                         </div>
 

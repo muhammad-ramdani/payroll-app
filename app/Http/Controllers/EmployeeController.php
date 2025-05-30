@@ -21,12 +21,12 @@ class EmployeeController extends Controller
         $rules = [
             'user.name' => 'required|string|max:250',
             'hire_date' => 'required|date',
-            'basic_salary' => 'required|numeric|min:1',
-            'paid_holidays' => 'required|integer|min:0|max:31',
-            'daily_overtime_pay' => 'required|numeric|min:1',
-            'bpjs_health' => 'required|integer|min:0|max:100',
-            'bpjs_employment' => 'required|integer|min:0|max:100',
-            'income_tax' => 'required|integer|min:0|max:100',
+            'basic_salary' => 'required|numeric',
+            'paid_holidays' => 'required|integer|max:31',
+            'daily_overtime_pay' => 'required|numeric',
+            'bpjs_health' => 'required|integer|max:100',
+            'bpjs_employment' => 'required|integer|max:100',
+            'income_tax' => 'required|integer|max:100',
         ];
 
         if(!$forUpdate) {

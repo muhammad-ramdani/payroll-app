@@ -8,6 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { ShopProfileProps } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 export default function ShopProfile({ shopProfile }: ShopProfileProps) {
     const { data, setData, patch, processing, recentlySuccessful, errors } = useForm({
@@ -18,16 +19,16 @@ export default function ShopProfile({ shopProfile }: ShopProfileProps) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        patch(route('toko.update'));
+        patch(route('profile-toko.update'), { onSuccess: () => toast.success('Profil toko berhasil diubah', { action: { label: 'Tutup', onClick: () => {} } }) });
     }
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Toko settings', href: '/' }]}>
-            <Head title="Toko settings" />
+        <AppLayout breadcrumbs={[{ title: 'Pengaturan profil toko', href: '/' }]}>
+            <Head title="Pengaturan profil toko" />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Toko settings" description="Ubah nama toko, alamat toko, dan nomor handphone toko kamu" />
+                    <HeadingSmall title="Profil Toko" description="Ubah nama toko, alamat toko, dan nomor handphone toko kamu" />
 
                     <form onSubmit={submit} className="space-y-6">
                         {/* Nama Toko */}

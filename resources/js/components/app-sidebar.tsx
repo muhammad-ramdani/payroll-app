@@ -18,13 +18,13 @@ export function AppSidebar() {
             role: 'admin',
         },
         {
-            title: 'Absensi',
-            href: '/absensi',
+            title: 'Presensi',
+            href: '/presensi',
             icon: ClipboardCheck,
             role: 'karyawan',
         },
         {
-            title: 'Shift',
+            title: 'Shift Kerja',
             href: '/shift-karyawan',
             icon: RefreshCw,
             role: 'karyawan',
@@ -36,19 +36,19 @@ export function AppSidebar() {
             role: 'karyawan',
         },
         {
-            title: 'Monitoring Absensi',
-            href: '/monitoring-absensi',
+            title: 'Monitoring Presensi',
+            href: '/monitoring-presensi',
             icon: UserSearch,
             role: 'admin',
         },
         {
-            title: 'Aturan Absensi',
-            href: '/aturan-absensi',
+            title: 'Aturan Presensi',
+            href: '/aturan-presensi',
             icon: CalendarCog,
             role: 'admin',
         },
         {
-            title: 'Shift',
+            title: 'Shift Kerja',
             href: '/admin-shift-karyawan',
             icon: RefreshCw,
             role: 'admin',
@@ -77,20 +77,20 @@ export function AppSidebar() {
 
     const reportNavItems: NavReportItem[] = [
         {
-            title: 'Rekap Absensi',
-            href: '/rekap-absensi',
+            title: 'Rekap Presensi',
+            href: '/rekap-presensi',
             icon: ClipboardList,
             role: 'karyawan',
         },
         {
-            title: 'Laporan Absensi',
-            href: '/laporan-absensi-karyawan',
+            title: 'Laporan Presensi',
+            href: '/laporan-presensi-karyawan',
             icon: CalendarClock,
             role: 'karyawan',
         },
         {
-            title: 'Laporan Absensi',
-            href: '/laporan-absensi-admin',
+            title: 'Laporan Presensi',
+            href: '/laporan-presensi-admin',
             icon: CalendarClock,
             role: 'admin',
         },

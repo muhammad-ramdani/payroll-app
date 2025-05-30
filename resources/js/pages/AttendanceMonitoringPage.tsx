@@ -149,8 +149,8 @@ export default function AttendanceMonitoringPage() {
     // UI Rendering
     // -------------------------------------------------------------------------
     return (
-        <AppLayout breadcrumbs={[{ title: 'Monitoring Absensi', href: '/' }]}>
-            <Head title="Absensi Karyawan" />
+        <AppLayout breadcrumbs={[{ title: 'Monitoring Presensi', href: '/' }]}>
+            <Head title="Monitoring Presensi" />
 
             {/* Konten Utama */}
             <div className="overflow-x-auto p-4">
@@ -203,7 +203,7 @@ export default function AttendanceMonitoringPage() {
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={tableColumns.length} className="text-muted-foreground h-24 text-center">
-                                        Absensi baru akan tersedia pukul 06:30 pagi.
+                                        Presensi baru akan tersedia pukul 06:30 pagi.
                                     </TableCell>
                                 </TableRow>
                             )}

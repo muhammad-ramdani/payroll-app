@@ -12,8 +12,9 @@ import { CreateModalProps } from '@/types';
 import { addDays, format, startOfDay } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
-import { formatRupiah, parseRupiah, useFormEmployee } from './FormUtils';
+import { formatRupiah, parseNumber, parseRupiah, useFormEmployee } from './FormUtils';
 
 export default function CreateModal({ open, onClose, createEmployee }: CreateModalProps) {
     const { data, setData, post, errors, processing, reset } = useFormEmployee();
@@ -46,6 +47,7 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
                 onClose();
                 reset();
                 setIsAccountNameSame(false);
+                toast.success('Data karyawan berhasil disimpan', { action: { label: 'Tutup', onClick: () => {} } });
             },
         });
     };
@@ -56,11 +58,8 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
         <Modal open={open} onClose={onClose} title="Tambah Data Karyawan">
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid gap-2">
-                    <Label>
-                        Nama<span className="text-red-600">*</span>
-                    </Label>
+                    <Label>Nama</Label>
                     <Input
-                        minLength={3}
                         maxLength={250}
                         value={data.user.name}
                         onChange={(e) => {
@@ -73,9 +72,7 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
 
                 <div className="grid items-start gap-4 sm:grid-cols-2">
                     <div className="grid gap-2">
-                        <Label>
-                            Shift Kerja<span className="text-red-600">*</span>
-                        </Label>
+                        <Label>Shift Kerja</Label>
                         <Select value={data.shift_type} onValueChange={(value) => setData('shift_type', value as 'Pagi' | 'Siang')}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Pilih shift" />
@@ -89,9 +86,7 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>
-                            Tanggal Mulai Kerja<span className="text-red-600">*</span>
-                        </Label>
+                        <Label>Tanggal Mulai Kerja</Label>
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className={cn('pl-3 text-left font-normal', !data.hire_date && 'text-muted-foreground')}>
@@ -103,9 +98,7 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
                                 <Calendar
                                     mode="single"
                                     selected={data.hire_date ?? undefined}
-                                    onSelect={(date) => {
-                                        if (date) setData('hire_date', date);
-                                    }}
+                                    onSelect={(date) => date && setData('hire_date', date)}
                                     disabled={(date) => date > startOfDay(addDays(new Date(), 2)) || date < new Date('2016-01-01')}
                                     initialFocus
                                 />
@@ -115,54 +108,54 @@ export default function CreateModal({ open, onClose, createEmployee }: CreateMod
                     </div>
                 </div>
 
-                <div className="grid items-start gap-4 sm:grid-cols-2">
+                <div className="grid items-start gap-4 sm:grid-cols-3">
                     <div className="grid gap-2">
-                        <Label>
-                            Gaji Pokok Harian (Rp)<span className="text-red-600">*</span>
-                        </Label>
-                        <Input value={formatRupiah(data.basic_salary)} maxLength={8} onChange={(e) => setData('basic_salary', parseRupiah(e.target.value))} />
+                        <Label>Gaji Pokok Harian</Label>
+                        <Input value={formatRupiah(data.basic_salary)} maxLength={11} onChange={(e) => setData('basic_salary', parseRupiah(e.target.value))} />
                         <InputError message={errors.basic_salary} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>
-                            Uang Lembur Harian (Rp)<span className="text-red-600">*</span>
-                        </Label>
-                        <Input value={formatRupiah(data.daily_overtime_pay)} maxLength={8} onChange={(e) => setData('daily_overtime_pay', parseRupiah(e.target.value))} />
+                        <Label>Uang Lembur Harian</Label>
+                        <Input value={formatRupiah(data.daily_overtime_pay)} maxLength={11} onChange={(e) => setData('daily_overtime_pay', parseRupiah(e.target.value))} />
                         <InputError message={errors.daily_overtime_pay} />
                     </div>
-                </div>
 
-                <div className="grid gap-2">
-                    <Label>
-                        Jatah Hari Libur<span className="text-red-600">*</span>
-                    </Label>
-                    <Input maxLength={2} value={data.paid_holidays} onChange={(e) => setData('paid_holidays', e.target.value.replace(/[^0-9]/g, ''))} />
-                    <InputError message={errors.paid_holidays} />
+                    <div className="grid gap-2">
+                        <Label>Jatah Hari Libur</Label>
+                        <div className="relative">
+                            <Input maxLength={2} value={data.paid_holidays || 0} onChange={(e) => setData('paid_holidays', parseNumber(e.target.value))} />
+                            <span className="absolute top-2 right-3">Hari</span>
+                        </div>
+                        <InputError message={errors.paid_holidays} />
+                    </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
                     <div className="grid gap-2">
-                        <Label>
-                            BPJS Kesehatan (%)<span className="text-red-600">*</span>
-                        </Label>
-                        <Input maxLength={2} value={data.bpjs_health} onChange={(e) => setData('bpjs_health', e.target.value.replace(/[^0-9]/g, ''))} />
+                        <Label>BPJS Kesehatan</Label>
+                        <div className="relative">
+                            <Input maxLength={2} value={data.bpjs_health || 0} onChange={(e) => setData('bpjs_health', parseNumber(e.target.value))} />
+                            <span className="absolute top-2 right-3">%</span>
+                        </div>
                         <InputError message={errors.bpjs_health} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>
-                            BPJS Ketenagakerjaan (%)<span className="text-red-600">*</span>
-                        </Label>
-                        <Input maxLength={2} value={data.bpjs_employment} onChange={(e) => setData('bpjs_employment', e.target.value.replace(/[^0-9]/g, ''))} />
+                        <Label>BPJS Ketenagakerjaan</Label>
+                        <div className="relative">
+                            <Input maxLength={2} value={data.bpjs_employment || 0} onChange={(e) => setData('bpjs_employment', parseNumber(e.target.value))} />
+                            <span className="absolute top-2 right-3">%</span>
+                        </div>
                         <InputError message={errors.bpjs_employment} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>
-                            PPh (%)<span className="text-red-600">*</span>
-                        </Label>
-                        <Input maxLength={2} value={data.income_tax} onChange={(e) => setData('income_tax', e.target.value.replace(/[^0-9]/g, ''))} />
+                        <Label>PPh</Label>
+                        <div className="relative">
+                            <Input maxLength={2} value={data.income_tax} onChange={(e) => setData('income_tax', parseNumber(e.target.value))} />
+                            <span className="absolute top-2 right-3">%</span>
+                        </div>
                         <InputError message={errors.income_tax} />
                     </div>
                 </div>

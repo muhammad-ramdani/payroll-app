@@ -7,7 +7,7 @@ test('halaman profil dapat ditampilkan', function () {
 
     $response = $this
         ->actingAs($user)
-        ->get('/settings/profile');
+        ->get('/settings/profile-akun');
 
     $response->assertOk();
 });
@@ -17,14 +17,14 @@ test('informasi profil dapat diperbarui', function () {
 
     $response = $this
         ->actingAs($user)
-        ->patch('/settings/profile', [
+        ->patch('/settings/profile-akun', [
             'name' => 'Test User',
             'username' => 'testuser',
         ]);
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/settings/profile');
+        ->assertRedirect('/settings/profile-akun');
 
     $user->refresh();
 

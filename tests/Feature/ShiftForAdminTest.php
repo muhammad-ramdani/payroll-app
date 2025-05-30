@@ -17,7 +17,7 @@ test('user yang terautentikasi role admin dapat mengakses halaman shift di admin
 test('user yang terautentikasi role karyawan tidak dapat mengakses halaman shift di admin', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'karyawan']));
 
-    $this->get('/admin-shift-karyawan')->assertRedirect('/absensi');
+    $this->get('/admin-shift-karyawan')->assertRedirect('/presensi');
 });
 
 test('admin dapat mengganti shift karyawan', function () {

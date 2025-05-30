@@ -2,15 +2,14 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { ShiftSwapPageProps } from '@/types';
 import { Head, router } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 export default function ShiftSwapPage({ receivedRequests }: ShiftSwapPageProps) {
-    const handleApprove = (requestId: number) => {
-        router.post(`/permintaan-tukar-shift/${requestId}/approve`);
-    };
+    const handleApprove = (requestId: number) =>
+        router.post(`/permintaan-tukar-shift/${requestId}/approve`, {}, { onSuccess: () => toast.success('Shift berhasil ditukar', { action: { label: 'Tutup', onClick: () => {} } }) });
 
-    const handleReject = (requestId: number) => {
-        router.post(`/permintaan-tukar-shift/${requestId}/reject`);
-    };
+    const handleReject = (requestId: number) =>
+        router.post(`/permintaan-tukar-shift/${requestId}/reject`, {}, { onSuccess: () => toast.info('Shift tidak ditukar', { action: { label: 'Tutup', onClick: () => {} } }) });
 
     return (
         <AppLayout breadcrumbs={[{ title: 'Permintaan Tukar Shift', href: '/' }]}>

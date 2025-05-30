@@ -14,21 +14,17 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::call(function () {
-    $date = now()->toDateString(); // YYYY-MM-DD
-    $employees = Employee::with('user.shift')->get();
+Schedule::call(function () {;
+    $employees = Employee::all();
 
     foreach ($employees as $employee) {
-        $shiftType = $employee->user->shift->shift_type ?? 'Pagi';
-
-        // Buat hanya jika belum ada
         Attendance::firstOrCreate(
-            ['user_id' => $employee->user_id, 'date' => $date],
+            ['user_id' => $employee->user_id, 'date' => now()->toDateString()],
             [
-                'shift_type' => $shiftType,
-                'clock_in'  => null,
-                'clock_out' => null,
-                'status'    => 'not_started',
+                'shift_type' => Shift::where('user_id', $employee->user_id)->value('shift_type'),
+                'clock_in'   => null,
+                'clock_out'  => null,
+                'status'     => 'not_started',
             ]
         );
     }
@@ -36,14 +32,11 @@ Schedule::call(function () {
 // })->everyMinute();
 
 Schedule::call(function () {
-     $date = now()->toDateString(); // Mendapatkan tanggal hari ini dalam format YYYY-MM-DD
-
-        // Memperbarui status menjadi 'leave' untuk entri yang belum memiliki clock_in dan clock_out
-    Attendance::whereDate('date', $date)
+    Attendance::whereDate('date', now()->toDateString())
         ->whereNull('clock_in')
         ->whereNull('clock_out')
         ->update(['status' => 'leave']);
-})->dailyAt('13:30');
+})->dailyAt('14:00');
 // })->everyMinute();
 
 // Jadwal pembuatan payroll awal setiap tanggal 10
@@ -52,16 +45,11 @@ Schedule::call(function () {
     $currentYear = now()->year;
 
     Employee::whereNull('deleted_at')->each(function ($employee) use ($currentMonth, $currentYear) {
-        // Membuat payroll dengan data minimal jika belum ada
         Payroll::firstOrCreate(
             [
                 'user_id' => $employee->user_id,
                 'period_month' => $currentMonth,
                 'period_year' => $currentYear
-            ],
-            [
-                'salary_status' => 'uncalculated',
-                'confirmation_status' => 'blank',
             ]
         );
     });

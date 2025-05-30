@@ -13,7 +13,7 @@ class AttendanceSeeder extends Seeder
     public function run(): void
     {
         $employees = Employee::all();
-        $startDate = now()->startOfMonth()->subYear();
+        $startDate = now()->startOfMonth()->subMonths(6);
         $endDate = now();
         $period = CarbonPeriod::create($startDate, $endDate);
 

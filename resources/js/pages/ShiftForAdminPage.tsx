@@ -3,18 +3,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 // Tipe data
 import { Shift } from '@/types';
 
 export default function ShiftForAdminPage({ shifts }: { shifts: Shift[] }) {
     const handleShiftChange = (userId: string, newShift: 'Pagi' | 'Siang') => {
-        router.patch(`/admin-shift-karyawan/${userId}`, { shift_type: newShift });
+        router.patch(
+            `/admin-shift-karyawan/${userId}`,
+            { shift_type: newShift },
+            { onSuccess: () => toast.success('Shift berhasil diubah', { action: { label: 'Tutup', onClick: () => {} } }) },
+        );
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Shift', href: '/' }]}>
-            <Head title="Shift" />
+        <AppLayout breadcrumbs={[{ title: 'Shift Kerja', href: '/' }]}>
+            <Head title="Shift Kerja" />
 
             <div className="p-4">
                 <div className="rounded-md border">

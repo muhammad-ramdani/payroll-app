@@ -10,6 +10,7 @@ import { Head, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 const salaryStatus = {
     uncalculated: ['Belum Dihitung', 'bg-neutral-500/10 text-natural-500'],
@@ -44,14 +45,14 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                 cell: ({ row }) => (row.original.net_salary ? <span className="text-nowrap">Rp {row.original.net_salary.toLocaleString('id-ID')}</span> : '-'),
             },
             {
-                header: 'Status',
+                header: 'Status Gaji',
                 cell: ({ row }) => {
                     const [label, style] = salaryStatus[row.original.salary_status];
                     return <Badge className={style}>{label}</Badge>;
                 },
             },
             {
-                header: 'Konfirmasi',
+                header: 'Konfirmasi Terima Gaji',
                 cell: ({ row }) => {
                     const [label, style] = confirmationStatus[row.original.confirmation_status];
                     return <Badge className={style}>{label}</Badge>;
@@ -74,10 +75,10 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => showDetails(row.original)}>Lihat Detail</DropdownMenuItem>
-                                    {confirmation_status === 'pending_confirmation' && <DropdownMenuItem onClick={() => confirmSalary(id)}>Tandai Diterima</DropdownMenuItem>}
+                                    <DropdownMenuItem onClick={() => showDetails(row.original)}>Lihat Detail Gaji</DropdownMenuItem>
+                                    {confirmation_status === 'pending_confirmation' && <DropdownMenuItem onClick={() => confirmSalary(id)}>Sudah Terima Gaji</DropdownMenuItem>}
                                     <DropdownMenuItem onClick={() => window.open(`/penggajian/pdf/${id}`, '_blank')} hidden={row.original.confirmation_status !== 'received'}>
-                                        Slip Gaji
+                                        Cetak Slip Gaji
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -94,11 +95,12 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
         setIsDetailOpen(true);
     };
 
-    const confirmSalary = (id: number) => {
-        router.patch(`/penggajian/confirmation/${id}`, {
-            confirmation_status: 'received',
-        });
-    };
+    const confirmSalary = (id: number) =>
+        router.patch(
+            `/penggajian/confirmation/${id}`,
+            { confirmation_status: 'received' },
+            { onSuccess: () => toast.success('Berhasil konfirmasi sudah terima gaji', { action: { label: 'Tutup', onClick: () => {} } }) },
+        );
 
     const table = useReactTable({
         data: filteredData,
@@ -109,19 +111,21 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
     return (
         <AppLayout breadcrumbs={[{ title: 'Penggajian', href: '/' }]}>
             <Head title="Penggajian" />
-            <div className="space-y-4 pt-4 px-4">
-                <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(Number(v))}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {uniqueYears.map((year) => (
-                            <SelectItem key={year} value={year.toString()}>
-                                {year}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+            <div className="space-y-4 px-4 pt-4">
+                {uniqueYears.length > 0 && (
+                    <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(Number(v))}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {uniqueYears.map((year) => (
+                                <SelectItem key={year} value={year.toString()}>
+                                    {year}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
 
                 <div className="rounded-md border">
                     <Table>
@@ -135,13 +139,21 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                                    ))}
+                            {table.getRowModel().rows.length > 0 ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={100} className="text-muted-foreground h-24 text-center">
+                                        Data penggajian belum tersedia
+                                    </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 </div>
@@ -151,7 +163,7 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                 <p className="text-sm font-semibold">Catatan:</p>
                 <ul className="ml-5 list-disc space-y-1 text-sm">
                     <li>Anda baru bisa melihat detail gaji jika statusnya sudah 'Sudah Dibayar'.</li>
-                    <li>Anda baru bisa mencetak slip gaji setelah mengonfirmasi 'Gaji Sudah Diterima'.</li>
+                    <li>Anda baru bisa mencetak slip gaji setelah mengonfirmasi 'Saya Sudah Terima Gaji'.</li>
                 </ul>
             </div>
 

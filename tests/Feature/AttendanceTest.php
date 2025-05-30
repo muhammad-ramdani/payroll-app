@@ -5,23 +5,23 @@ use App\Models\Employee;
 use App\Models\Shift;
 use App\Models\Attendance;
 
-test('user yang belum login tidak dapat mengakses halaman absensi', function () {
-    $this->get('/absensi')->assertRedirect('/');
+test('user yang belum login tidak dapat mengakses halaman presensi', function () {
+    $this->get('/presensi')->assertRedirect('/');
 });
 
-test('user yang terautentikasi role karyawan dapat mengakses halaman absensi', function () {
+test('user yang terautentikasi role karyawan dapat mengakses halaman presensi', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'karyawan']));
 
-    $this->get('/absensi')->assertOk();
+    $this->get('/presensi')->assertOk();
 });
 
-test('user yang terautentikasi role admin tidak dapat mengakses halaman absensi', function () {
+test('user yang terautentikasi role admin tidak dapat mengakses halaman presensi', function () {
     $this->actingAs($user = User::factory()->create(['role' => 'admin']));
 
-    $this->get('/absensi')->assertRedirect('/dashboard');
+    $this->get('/presensi')->assertRedirect('/dashboard');
 });
 
-test('karyawan tidak dapat melakukan absensi pulang sebelum absensi masuk', function () {
+test('karyawan tidak dapat melakukan presensi pulang sebelum presensi masuk', function () {
     $user = User::factory()->create(['role' => 'karyawan']);
     $this->actingAs($user);
 
@@ -32,7 +32,7 @@ test('karyawan tidak dapat melakukan absensi pulang sebelum absensi masuk', func
         'status' => 'not_started',
     ]);
     
-    $response = $this->patch("/absensi/{$attendance->id}", [
+    $response = $this->patch("/presensi/{$attendance->id}", [
         'action' => 'clock_out',
     ]);
     
@@ -43,7 +43,7 @@ test('karyawan tidak dapat melakukan absensi pulang sebelum absensi masuk', func
     expect($attendance->status)->toBe('not_started');
 });
 
-test('karyawan dapat melakukan absensi masuk', function () {
+test('karyawan dapat melakukan presensi masuk', function () {
     $user = User::factory()->create(['role' => 'karyawan']);
     $this->actingAs($user);
 
@@ -54,7 +54,7 @@ test('karyawan dapat melakukan absensi masuk', function () {
         'status' => 'not_started',
     ]);
 
-    $response = $this->patch("/absensi/{$attendance->id}", [
+    $response = $this->patch("/presensi/{$attendance->id}", [
         'action' => 'clock_in',
     ]);
 
@@ -65,7 +65,7 @@ test('karyawan dapat melakukan absensi masuk', function () {
     expect($attendance->status)->toBe('working');
 });
 
-test('karyawan tidak dapat melakukan absensi masuk lebih dari sekali', function () {
+test('karyawan tidak dapat melakukan presensi masuk lebih dari sekali', function () {
     $user = User::factory()->create(['role' => 'karyawan']);
     $this->actingAs($user);
 
@@ -79,12 +79,12 @@ test('karyawan tidak dapat melakukan absensi masuk lebih dari sekali', function 
     $firstClockIn = now()->format('H:i:s');
 
     $this->travelTo($firstClockIn);
-    $this->patch("/absensi/{$attendance->id}", [
+    $this->patch("/presensi/{$attendance->id}", [
         'action' => 'clock_in',
     ]);
 
     $this->travel(10)->minutes();
-    $response = $this->patch("/absensi/{$attendance->id}", [
+    $response = $this->patch("/presensi/{$attendance->id}", [
         'action' => 'clock_in',
     ]);
 
@@ -95,7 +95,7 @@ test('karyawan tidak dapat melakukan absensi masuk lebih dari sekali', function 
     expect($attendance->status)->toBe('working');
 });
 
-test('karyawan dapat melakukan absensi pulang setelah absensi masuk', function () {
+test('karyawan dapat melakukan presensi pulang setelah presensi masuk', function () {
     $user = User::factory()->create(['role' => 'karyawan']);
     $this->actingAs($user);
 
@@ -107,7 +107,7 @@ test('karyawan dapat melakukan absensi pulang setelah absensi masuk', function (
         'clock_in' => now()->subHours(2),
     ]);
 
-    $response = $this->patch("/absensi/{$attendance->id}", [
+    $response = $this->patch("/presensi/{$attendance->id}", [
         'action' => 'clock_out',
     ]);
 
@@ -118,7 +118,7 @@ test('karyawan dapat melakukan absensi pulang setelah absensi masuk', function (
     expect($attendance->status)->toBe('finished');
 });
 
-test('karyawan tidak dapat melakukan absensi pulang lebih dari sekali', function () {
+test('karyawan tidak dapat melakukan presensi pulang lebih dari sekali', function () {
     $user = User::factory()->create(['role' => 'karyawan']);
     $this->actingAs($user);
 
@@ -133,12 +133,12 @@ test('karyawan tidak dapat melakukan absensi pulang lebih dari sekali', function
     $firstClockOut = now()->format('H:i:s');
 
     $this->travelTo($firstClockOut);
-    $this->patch("/absensi/{$attendance->id}", [
+    $this->patch("/presensi/{$attendance->id}", [
         'action' => 'clock_out',
     ]);
 
     $this->travel(10)->minutes();
-    $response = $this->patch("/absensi/{$attendance->id}", [
+    $response = $this->patch("/presensi/{$attendance->id}", [
         'action' => 'clock_out',
     ]);
 
@@ -149,7 +149,7 @@ test('karyawan tidak dapat melakukan absensi pulang lebih dari sekali', function
     expect($attendance->status)->toBe('finished');
 });
 
-test('karyawan dapat melakukan absensi sakit', function () {
+test('karyawan dapat melakukan presensi sakit', function () {
     $user = User::factory()->create(['role' => 'karyawan']);
     $this->actingAs($user);
 
@@ -160,7 +160,7 @@ test('karyawan dapat melakukan absensi sakit', function () {
         'status' => 'not_started',
     ]);
 
-    $response = $this->patch("/absensi/{$attendance->id}", [
+    $response = $this->patch("/presensi/{$attendance->id}", [
         'action' => 'sick',
     ]);
 
@@ -171,7 +171,7 @@ test('karyawan dapat melakukan absensi sakit', function () {
     expect($attendance->status)->toBe('sick');
 });
 
-test('karyawan dapat melakukan absensi cuti', function () {
+test('karyawan dapat melakukan presensi cuti', function () {
     $user = User::factory()->create(['role' => 'karyawan']);
     $this->actingAs($user);
 
@@ -182,7 +182,7 @@ test('karyawan dapat melakukan absensi cuti', function () {
         'status' => 'not_started',
     ]);
 
-    $response = $this->patch("/absensi/{$attendance->id}", [
+    $response = $this->patch("/presensi/{$attendance->id}", [
         'action' => 'leave',
     ]);
 

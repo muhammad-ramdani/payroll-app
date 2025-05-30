@@ -12,23 +12,22 @@ class EmployeeSeeder extends Seeder
 {
     public function run(): void
     {
-        for ($i = 0; $i < 8; $i++) {
+        $names = ['Meli', 'Wina', 'Hikmah', 'Satriadi', 'Anjar', 'Ilham', 'Asep'];
+
+        foreach ($names as $name) {
             $uuid = Str::uuid();
-            $name = fake()->name(); // Hasilkan nama
-            
-            // Buat user
+
             User::create([
                 'id'       => $uuid,
                 'name'     => $name,
-                'username' => fake()->unique()->userName(),
+                'username' => $name . '_' . mt_rand(100, 999),
                 'password' => Hash::make('password'),
                 'role'     => 'karyawan',
             ]);
 
-            // Buat employee dengan account_name sesuai nama user
             Employee::factory()->create([
                 'id'           => $uuid,
-                'user_id'     => $uuid,
+                'user_id'      => $uuid,
                 'account_name' => $name,
             ]);
         }

@@ -11,7 +11,8 @@ import { EditModalProps } from '@/types';
 import { addDays, format, startOfDay } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
-import { formatRupiah, parseRupiah, useFormEmployee } from './FormUtils';
+import { toast } from 'sonner';
+import { formatRupiah, parseNumber, parseRupiah, useFormEmployee } from './FormUtils';
 
 export default function EditModal({ open, onClose, employee, updateEmployee }: EditModalProps) {
     const { data, setData, patch, processing, errors, reset } = useFormEmployee();
@@ -44,6 +45,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                 updateEmployee(data);
                 onClose();
                 reset();
+                toast.success('Data karyawan berhasil disimpan', { action: { label: 'Tutup', onClick: () => {} } });
             },
         });
     };
@@ -114,7 +116,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                     <Label>
                         Jatah Hari Libur<span className="text-red-600">*</span>
                     </Label>
-                    <Input maxLength={2} value={data.paid_holidays} onChange={(e) => setData('paid_holidays', e.target.value.replace(/[^0-9]/g, ''))} />
+                    <Input maxLength={2} value={data.paid_holidays} onChange={(e) => setData('paid_holidays', parseNumber(e.target.value))} />
                     <InputError message={errors.paid_holidays} />
                 </div>
 
@@ -123,7 +125,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                         <Label>
                             BPJS Kesehatan (%)<span className="text-red-600">*</span>
                         </Label>
-                        <Input maxLength={2} value={data.bpjs_health} onChange={(e) => setData('bpjs_health', e.target.value.replace(/[^0-9]/g, ''))} />
+                        <Input maxLength={2} value={data.bpjs_health} onChange={(e) => setData('bpjs_health', parseNumber(e.target.value))} />
                         <InputError message={errors.bpjs_health} />
                     </div>
 
@@ -131,7 +133,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                         <Label>
                             BPJS Ketenagakerjaan (%)<span className="text-red-600">*</span>
                         </Label>
-                        <Input maxLength={2} value={data.bpjs_employment} onChange={(e) => setData('bpjs_employment', e.target.value.replace(/[^0-9]/g, ''))} />
+                        <Input maxLength={2} value={data.bpjs_employment} onChange={(e) => setData('bpjs_employment', parseNumber(e.target.value))} />
                         <InputError message={errors.bpjs_employment} />
                     </div>
 
@@ -139,7 +141,7 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                         <Label>
                             PPh (%)<span className="text-red-600">*</span>
                         </Label>
-                        <Input maxLength={2} value={data.income_tax} onChange={(e) => setData('income_tax', e.target.value.replace(/[^0-9]/g, ''))} />
+                        <Input maxLength={2} value={data.income_tax} onChange={(e) => setData('income_tax', parseNumber(e.target.value))} />
                         <InputError message={errors.income_tax} />
                     </div>
                 </div>

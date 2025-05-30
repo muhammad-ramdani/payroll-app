@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 import { ShiftForEmployeePageProps } from '@/types';
 import { Head, router } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 export default function ShiftForEmployeePage({ userShifts, otherShifts, sentRequests, globalPendingShiftIds }: ShiftForEmployeePageProps) {
     const allShifts = [...userShifts, ...otherShifts];
@@ -11,16 +12,15 @@ export default function ShiftForEmployeePage({ userShifts, otherShifts, sentRequ
     const globalPendingSet = new Set<number>(globalPendingShiftIds);
 
     const handleRequestSwap = (id: number) => {
-        router.post('/swap-requests', { shift_id: id });
+        router.post('/swap-requests', { shift_id: id }, { onSuccess: () => toast.success('Berhasil Meminta tukar shift', { action: { label: 'Tutup', onClick: () => {} } }) });
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Shift', href: '/' }]}>
-            <Head title="Shift" />
+        <AppLayout breadcrumbs={[{ title: 'Shift Kerja', href: '/' }]}>
+            <Head title="Shift Kerja" />
             <div className="m-4 space-y-8">
                 {/* Semua Shift */}
                 <div className="space-y-2">
-                    <p className="text-sm font-medium">Semua Shift</p>
                     <div className="rounded-md border">
                         <Table>
                             <TableHeader>
@@ -50,7 +50,7 @@ export default function ShiftForEmployeePage({ userShifts, otherShifts, sentRequ
                                                     !isMy &&
                                                     !userShiftTypes.has(shift.shift_type) && (
                                                         <Button onClick={() => handleRequestSwap(shift.id)} disabled={globalPendingSet.size > 0}>
-                                                            Minta Tukar
+                                                            Minta Tukar Shift
                                                         </Button>
                                                     )
                                                 )}
@@ -68,7 +68,7 @@ export default function ShiftForEmployeePage({ userShifts, otherShifts, sentRequ
                     <p className="text-sm font-semibold">Catatan:</p>
                     <ul className="ml-5 list-disc space-y-1 text-sm">
                         <li>
-                            Perhatian: Pertukaran shift untuk absensi hari ini tidak bisa dilakukan setelah pukul 06:30 pagi, karena data di sistem absensi tidak akan ikut berubah.
+                            Perhatian: Pertukaran shift untuk presensi hari ini tidak bisa dilakukan setelah pukul 06:30 pagi, karena data di sistem presensi tidak akan ikut berubah.
                             Silakan lakukan pertukaran sebelum pukul 06:30 atau pada hari sebelumnya. Untuk pertukaran shift hari esok, bisa dilakukan setelah pukul 06:30 hari ini.
                         </li>
                         <li>

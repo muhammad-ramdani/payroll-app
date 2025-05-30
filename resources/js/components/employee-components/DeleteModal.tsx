@@ -10,12 +10,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { DeleteModalProps } from '@/types';
 import { router } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 export default function DeleteModal({ open, onClose, deleteEmployee, employee }: DeleteModalProps) {
     const handleDelete = () => {
         if (!employee?.id) return;
         router.delete(`/data-karyawan/${employee.id}`, {
-            onSuccess: () => (deleteEmployee(employee.id), onClose()),
+            onSuccess: () => (deleteEmployee(employee.id), onClose(), toast.success('Data karyawan berhasil dihapus', { action: { label: 'Tutup', onClick: () => console } })),
         });
     };
 
@@ -25,8 +26,8 @@ export default function DeleteModal({ open, onClose, deleteEmployee, employee }:
                 <AlertDialogHeader>
                     <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Apakah Anda yakin ingin menghapus data
-                        <strong> {employee?.user.name}</strong>? Tindakan tidak dapat dibatalkan.
+                        Apakah Anda yakin ingin menghapus data karyawan dan akun milik
+                        <strong> {employee?.user.name}</strong>? <br /> Tindakan ini tidak dapat dibatalkan.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 

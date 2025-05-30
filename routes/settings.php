@@ -9,18 +9,18 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
-    Route::redirect('settings', 'settings/profile');
+    Route::redirect('settings', 'settings/profile-akun');
 
-    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('settings/profile-akun', [ProfileController::class, 'edit'])->name('profile-akun.edit');
+    Route::patch('settings/profile-akun', [ProfileController::class, 'update'])->name('profile-akun.update');
 
     Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
-        Route::get('settings/toko', [ShopProfileController::class, 'edit'])->name('toko');
-        Route::patch('settings/toko', [ShopProfileController::class, 'update'])->name('toko.update');
+        Route::get('settings/profile-toko', [ShopProfileController::class, 'edit']);
+        Route::patch('settings/profile-toko', [ShopProfileController::class, 'update'])->name('profile-toko.update');
     });
 
     Route::middleware(['auth', RoleMiddleware::class . ':karyawan'])->group(function () {
-        Route::get('settings/data-diri', [PersonalDataController::class, 'edit'])->name('data-diri');
+        Route::get('settings/data-diri', [PersonalDataController::class, 'edit']);
         Route::patch('settings/data-diri', [PersonalDataController::class, 'update'])->name('data-diri.update');
     });
 

@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type AttendanceRuleSettingPageProps } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 // Fungsi untuk format Rupiah
 const formatRupiah = (amount: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -27,7 +28,7 @@ export default function AttendanceRuleSettingPage({ attendanceRuleSettings }: At
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        patch(route('aturan-absensi.update'));
+        patch(route('aturan-presensi.update'), { onSuccess: () => toast.success('Aturan presensi berhasil diubah', { action: { label: 'Tutup', onClick: () => {} } }) });
     };
 
     const updateRule = (index: number, field: 'punctual_end' | 'late_threshold', value: string) => {
@@ -44,8 +45,8 @@ export default function AttendanceRuleSettingPage({ attendanceRuleSettings }: At
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Aturan Absensi', href: '/' }]}>
-            <Head title="Aturan Absensi" />
+        <AppLayout breadcrumbs={[{ title: 'Aturan Presensi', href: '/' }]}>
+            <Head title="Aturan Presensi" />
 
             <div className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-8">
@@ -54,11 +55,11 @@ export default function AttendanceRuleSettingPage({ attendanceRuleSettings }: At
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label>Batas Tepat Waktu shift {attendanceRuleSettings[idx].shift_type}</Label>
-                                    <Input type="time" value={rule.punctual_end} onChange={(e) => updateRule(idx, 'punctual_end', e.target.value)} className="block" />
+                                    <Input type="time" value={rule.punctual_end} onChange={(e) => updateRule(idx, 'punctual_end', e.target.value)} className="block" required />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Batas Terlambat shift {attendanceRuleSettings[idx].shift_type}</Label>
-                                    <Input type="time" value={rule.late_threshold} onChange={(e) => updateRule(idx, 'late_threshold', e.target.value)} className="block" />
+                                    <Input type="time" value={rule.late_threshold} onChange={(e) => updateRule(idx, 'late_threshold', e.target.value)} className="block" required />
                                 </div>
                             </div>
                         </div>
@@ -68,15 +69,11 @@ export default function AttendanceRuleSettingPage({ attendanceRuleSettings }: At
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
                                 <Label>Bonus Tepat Waktu</Label>
-                                <Input value={formatRupiah(data.bonus_penalty.bonus_amount)} onChange={(e) => updateBonusPenalty('bonus_amount', e.target.value)} inputMode="numeric" />
+                                <Input value={formatRupiah(data.bonus_penalty.bonus_amount)} onChange={(e) => updateBonusPenalty('bonus_amount', e.target.value)} maxLength={9} />
                             </div>
                             <div className="space-y-2">
                                 <Label>Denda Terlambat</Label>
-                                <Input
-                                    value={formatRupiah(data.bonus_penalty.penalty_amount)}
-                                    onChange={(e) => updateBonusPenalty('penalty_amount', e.target.value)}
-                                    inputMode="numeric"
-                                />
+                                <Input value={formatRupiah(data.bonus_penalty.penalty_amount)} onChange={(e) => updateBonusPenalty('penalty_amount', e.target.value)} maxLength={9} />
                             </div>
                         </div>
                     </div>

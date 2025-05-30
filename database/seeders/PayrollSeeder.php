@@ -15,19 +15,22 @@ class PayrollSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ambil semua data karyawan beserta relasi user
         $employees = Employee::with('user')->get();
-        
-        // Ambil setting bonus/penalty (diasumsikan hanya ada 1 record)
         $bonusPenaltySettings = AttendanceBonusPenaltySetting::first();
 
         // Loop untuk setiap karyawan
         foreach ($employees as $employee) {
-            // Membuat 11 bulan terakhir + bulan berjalan (total 12 bulan)
-            for ($i = 1; $i < 13; $i++) {
-                // Tanggal periode yang sedang diproses
-                $date = Carbon::now()->subMonths($i);
-                $isLastMonth = $i === 1; // Bulan terakhir (belum dihitung)
+            for ($i = 0; $i < 7; $i++) {
+                $date = Carbon::now()->startOfMonth()->subMonths($i);
+                $isLastMonth = $i === 0;
+
+                if ($i === 0) {
+                    $confirmationStatus = 'blank';
+                } elseif ($i === 1) {
+                    $confirmationStatus = 'pending_confirmation';
+                } else {
+                    $confirmationStatus = 'received';
+                }
 
                 // Data dasar payroll
                 $payrollData = [
@@ -35,10 +38,10 @@ class PayrollSeeder extends Seeder
                     'period_month' => $date->month,
                     'period_year' => $date->year,
                     'salary_status' => $isLastMonth ? 'uncalculated' : 'paid_cash', // Status bulan terakhir
-                    'confirmation_status' => $isLastMonth ? 'blank' : 'received', // Konfirmasi bulan terakhir
+                    'confirmation_status' => $confirmationStatus,
                 ];
 
-                // Hanya hitung untuk bulan yang sudah lewat (bukan bulan terakhir)
+                // Hanya hitung untuk bulan yang sudah lewat (bukan bulan ini)
                 if (!$isLastMonth) {
                     // Ambil data presensi bulan tersebut
                     $attendances = Attendance::where('user_id', $employee->user_id)->whereMonth('date', $date->month)->whereYear('date', $date->year)->get();

@@ -64,7 +64,7 @@ export default function DataKaryawan() {
                                         setIsEditModalOpen(true);
                                     }}
                                 >
-                                    Edit
+                                    Edit Data Karyawan
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     onClick={() => {
@@ -72,7 +72,7 @@ export default function DataKaryawan() {
                                         setIsDetailModalOpen(true);
                                     }}
                                 >
-                                    Lihat Detail
+                                    Lihat Detail Data Karyawan
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
@@ -82,7 +82,7 @@ export default function DataKaryawan() {
                                         setIsDeleteModalOpen(true);
                                     }}
                                 >
-                                    Hapus
+                                    Hapus Data Karyawan
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -110,12 +110,12 @@ export default function DataKaryawan() {
                         placeholder="Cari nama karyawan..."
                         value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
                         onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
-                        className="max-w-sm"
+                        className="mr-2 max-w-sm"
                     />
 
-                    <Button onClick={() => setIsCreateModalOpen(true)} className="mx-2" variant="secondary">
+                    <Button onClick={() => setIsCreateModalOpen(true)} className="ml-auto" variant="secondary">
                         <Plus />
-                        Tambah
+                        Tambah Karyawan
                     </Button>
                 </div>
 
@@ -142,7 +142,7 @@ export default function DataKaryawan() {
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
-                                        Tidak ada data.
+                                        Tidak ada data karyawan.
                                     </TableCell>
                                 </TableRow>
                             )}

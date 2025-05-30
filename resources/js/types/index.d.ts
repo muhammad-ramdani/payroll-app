@@ -74,11 +74,11 @@ export interface Employee {
     account_number: string;
     account_name: string;
     basic_salary: number;
-    paid_holidays: string;
+    paid_holidays: number;
     daily_overtime_pay: number;
-    bpjs_health: string;
-    bpjs_employment: string;
-    income_tax: string;
+    bpjs_health: number;
+    bpjs_employment: number;
+    income_tax: number;
     [key: string]: any;
 }
 

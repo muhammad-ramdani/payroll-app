@@ -19,7 +19,7 @@ test('user yang terautentikasi dengan role karyawan tidak dapat mengakses halama
     $karyawan = User::factory()->create(['role' => 'karyawan']);
     $this->actingAs($karyawan);
 
-    $this->get('/data-karyawan')->assertRedirect('/absensi');
+    $this->get('/data-karyawan')->assertRedirect('/presensi');
 });
 
 //! Test untuk fitur Create Data Karyawan

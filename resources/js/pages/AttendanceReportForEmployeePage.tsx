@@ -14,11 +14,11 @@ interface Props {
 
 export default function AttendanceReportForEmployeePage({ attendances }: Props) {
     // ==================== LOGIKA FILTER TAHUN ====================
-    // Mendapatkan daftar tahun unik dari data absensi
+    // Mendapatkan daftar tahun unik dari data Presensi
     const availableYears = useMemo(() => {
         const years = new Set<number>();
 
-        // Ekstrak tahun dari setiap data absensi
+        // Ekstrak tahun dari setiap data Presensi
         attendances.forEach((attendance) => {
             const year = new Date(attendance.date).getFullYear();
             years.add(year);
@@ -46,7 +46,7 @@ export default function AttendanceReportForEmployeePage({ attendances }: Props) 
             sick: 0,
         }));
 
-        // 2. Filter data absensi berdasarkan tahun yang dipilih
+        // 2. Filter data Presensi berdasarkan tahun yang dipilih
         const filteredAttendances = attendances.filter((attendance) => {
             const attendanceYear = new Date(attendance.date).getFullYear();
             return attendanceYear === selectedYear;
@@ -56,13 +56,13 @@ export default function AttendanceReportForEmployeePage({ attendances }: Props) 
         filteredAttendances.forEach((attendance) => {
             const monthIndex = new Date(attendance.date).getMonth();
 
-            // Update counter berdasarkan status absensi
+            // Update counter berdasarkan status Presensi
             if (attendance.status === 'finished') {
                 monthlyData[monthIndex].finished += 1;
 
                 // Hitung lembur jika ada clock_in dan clock_out
                 if (attendance.clock_in && attendance.clock_out) {
-                    // Gabungkan tanggal absensi dengan jam clock-in/out
+                    // Gabungkan tanggal Presensi dengan jam clock-in/out
                     const clockIn = new Date(`${attendance.date}T${attendance.clock_in}`);
                     const clockOut = new Date(`${attendance.date}T${attendance.clock_out}`);
 
@@ -93,27 +93,28 @@ export default function AttendanceReportForEmployeePage({ attendances }: Props) 
 
     // ==================== TAMPILAN KOMPONEN ====================
     return (
-        <AppLayout breadcrumbs={[{ title: 'Laporan Absensi', href: '/' }]}>
-            <Head title="Laporan Absensi" />
+        <AppLayout breadcrumbs={[{ title: 'Laporan Presensi', href: '/' }]}>
+            <Head title="Laporan Presensi" />
 
             <div className="m-4 space-y-4">
                 {/* SECTION: FILTER TAHUN */}
                 <div className="flex flex-wrap gap-4">
                     {/* Dropdown untuk memilih tahun */}
                     <div className="w-full md:w-auto">
-                        <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-
-                            <SelectContent>
-                                {availableYears.map((year) => (
-                                    <SelectItem key={year} value={String(year)}>
-                                        {year}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        {availableYears.length > 0 && (
+                            <Select value={String(selectedYear)} onValueChange={(value) => setSelectedYear(Number(value))}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih tahun" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableYears.map((year) => (
+                                        <SelectItem key={year} value={String(year)}>
+                                            {year}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
                     </div>
                 </div>
                 {/* SECTION: GRAFIK LAPORAN */}

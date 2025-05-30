@@ -8,12 +8,12 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 export default function Appearance() {
     return (
-        <AppLayout breadcrumbs={[{ title: 'Appearance settings', href: '/settings/appearance' }]}>
-            <Head title="Appearance settings" />
+        <AppLayout breadcrumbs={[{ title: 'Pengaturan tampilan', href: '/settings/appearance' }]}>
+            <Head title="Pengaturan tampilan" />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Appearance settings" description="Ubah appearance settings akun kamu" />
+                    <HeadingSmall title="Tampilan" description="Ubah tampilan akun kamu" />
                     <AppearanceTabs />
                 </div>
             </SettingsLayout>

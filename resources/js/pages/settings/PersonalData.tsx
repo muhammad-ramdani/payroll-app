@@ -11,11 +11,11 @@ import { Head, useForm } from '@inertiajs/react';
 
 export default function PersonalData({ employee }: PersonalDataProps) {
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
-        phone: employee.phone,
-        address: employee.address,
-        bank_name: employee.bank_name,
-        account_number: employee.account_number,
-        account_name: employee.account_name,
+        phone: employee.phone || '',
+        address: employee.address || '',
+        bank_name: employee.bank_name || '',
+        account_number: employee.account_number || '',
+        account_name: employee.account_name || '',
     });
 
     const submit = (e: React.FormEvent) => {
@@ -24,11 +24,11 @@ export default function PersonalData({ employee }: PersonalDataProps) {
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Data diri settings', href: '/' }]}>
-            <Head title="Data diri settings" />
+        <AppLayout breadcrumbs={[{ title: 'Pengaturan data diri', href: '/' }]}>
+            <Head title="Pengaturan data diri" />
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Data diri settings" description="Ubah nomor handphone, alamat, dan rekening bank kamu" />
+                    <HeadingSmall title="Data diri" description="Ubah nomor handphone, alamat, dan rekening bank kamu" />
 
                     <form onSubmit={submit} className="space-y-6">
                         {/* Phone Input */}
@@ -45,7 +45,7 @@ export default function PersonalData({ employee }: PersonalDataProps) {
                             <InputError message={errors.address} />
                         </div>
 
-                        <div className="grid sm:grid-cols-3 gap-6">
+                        <div className="grid gap-6 sm:grid-cols-3">
                             {/* Bank Name Input */}
                             <div className="grid gap-3">
                                 <Label>Nama Bank</Label>
@@ -54,7 +54,7 @@ export default function PersonalData({ employee }: PersonalDataProps) {
                             </div>
 
                             {/* Account Number Input */}
-                            <div className="sm:col-span-2 grid gap-3">
+                            <div className="grid gap-3 sm:col-span-2">
                                 <Label>Nomor Rekening</Label>
                                 <Input value={data.account_number} onChange={(e) => setData('account_number', e.target.value.replace(/[^0-9 -]/g, ''))} maxLength={100} />
                                 <InputError message={errors.account_number} />
