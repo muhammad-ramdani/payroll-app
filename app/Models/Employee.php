@@ -23,7 +23,7 @@ class Employee extends Model
         'basic_salary',
         'paid_holidays',
         'transportation_allowance',
-        'daily_overtime_pay',
+        'hourly_overtime_pay',
         'bpjs_health',
         'bpjs_employment',
         'income_tax',

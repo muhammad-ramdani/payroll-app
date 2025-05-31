@@ -35,9 +35,9 @@ export default function DetailModal({ open, onClose, payroll }: PayrollModalProp
                             Gaji Pokok Harian
                             <br />
                             <span className="text-red-500">(</span>
-                            {payroll.total_attendance_days}
+                            {payroll.total_attendance_days} hari
                             <span className="text-yellow-500"> + </span>
-                            {payroll.paid_holidays}
+                            {payroll.paid_holidays} hari
                             <span className="text-red-500">)</span>
                             <span className="text-yellow-500"> × </span>
                             Rp {payroll.basic_salary.toLocaleString('id-ID')}
@@ -49,13 +49,13 @@ export default function DetailModal({ open, onClose, payroll }: PayrollModalProp
                         <TableCell>Total Gaji Lembur</TableCell>
                         <TableCell>:</TableCell>
                         <TableCell className="text-sm/7">
-                            Total Lembur
+                            Total Jam Lembur
                             <span className="text-yellow-500"> × </span>
-                            Gaji Lembur Harian
+                            Uang Lembur Per Jam
                             <br />
-                            {payroll.total_overtime_days}
+                            {payroll.total_overtime_hours} jam
                             <span className="text-yellow-500"> × </span>
-                            Rp {payroll.daily_overtime_pay.toLocaleString('id-ID')}
+                            Rp {payroll.hourly_overtime_pay.toLocaleString('id-ID')}
                             <br />
                             <span className="text-blue-500">Rp {payroll.total_overtime_pay.toLocaleString('id-ID')}</span>
                         </TableCell>
@@ -68,7 +68,7 @@ export default function DetailModal({ open, onClose, payroll }: PayrollModalProp
                             <span className="text-yellow-500"> × </span>
                             Bonus Tepat Waktu Harian
                             <br />
-                            {payroll.total_punctual_days}
+                            {payroll.total_punctual_days} hari
                             <span className="text-yellow-500"> × </span>
                             Rp {payroll.bonus_amount.toLocaleString('id-ID')}
                             <br />
@@ -83,7 +83,7 @@ export default function DetailModal({ open, onClose, payroll }: PayrollModalProp
                             <span className="text-yellow-500"> × </span>
                             Potongan Telat Harian
                             <br />
-                            {payroll.total_late_days}
+                            {payroll.total_late_days} hari
                             <span className="text-yellow-500"> × </span>
                             Rp {payroll.penalty_amount.toLocaleString('id-ID')}
                             <br />

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('account_name')->nullable();
             $table->unsignedMediumInteger('basic_salary');
             $table->unsignedTinyInteger('paid_holidays');
-            $table->unsignedMediumInteger('daily_overtime_pay');
+            $table->unsignedMediumInteger('hourly_overtime_pay');
             $table->unsignedMediumInteger('transportation_allowance');
             $table->unsignedTinyInteger('bpjs_health');
             $table->unsignedTinyInteger('bpjs_employment');

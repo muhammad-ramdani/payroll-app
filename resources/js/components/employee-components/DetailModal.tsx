@@ -106,14 +106,14 @@ export default function DetailModal({ open, onClose, employee }: EmployeeModalPr
                             <TableCell colSpan={2}>{employee.paid_holidays} hari</TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableCell>Uang Lembur Harian</TableCell>
+                            <TableCell>Uang Lembur Per Jam</TableCell>
                             <TableCell>:</TableCell>
                             <TableCell>
                                 {new Intl.NumberFormat('id-ID', {
                                     style: 'currency',
                                     currency: 'IDR',
                                     maximumFractionDigits: 0,
-                                }).format(employee.daily_overtime_pay)}
+                                }).format(employee.hourly_overtime_pay)}
                             </TableCell>
                             <TableCell className="h-13"></TableCell>
                         </TableRow>

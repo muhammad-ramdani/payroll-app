@@ -66,10 +66,16 @@
         <!-- Lembur -->
         <tr>
             <td style="border: 1px solid #ddd; padding: 8px;">Lembur</td>
-            <td style="border-bottom: 1px solid #ddd; text-align: right">{{ $payroll->total_overtime_days }} Hari</td>
+            <td style="border-bottom: 1px solid #ddd; text-align: right">{{ $payroll->total_overtime_hours }} Jam</td>
             <td style="border-bottom: 1px solid #ddd; text-align: center;">×</td>
-            <td style="border-bottom: 1px solid #ddd; text-align: right; padding-right: 8px;">Rp {{ number_format($payroll->daily_overtime_pay, 0, ',', '.') }}</td>
+            <td style="border-bottom: 1px solid #ddd; text-align: right; padding-right: 8px;">Rp {{ number_format($payroll->hourly_overtime_pay, 0, ',', '.') }}</td>
             <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">Rp {{ number_format($payroll->total_overtime_pay, 0, ',', '.') }}</td>
+        </tr>
+
+        <!-- Tunjangan -->
+        <tr>
+            <td  colspan="4" style="border: 1px solid #ddd; padding: 8px;">Tunjangan Transportasi</td>
+            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">Rp {{ number_format($payroll->transportation_allowance, 0, ',', '.') }}</td>
         </tr>
 
         <!-- Bonus Tepat Waktu -->

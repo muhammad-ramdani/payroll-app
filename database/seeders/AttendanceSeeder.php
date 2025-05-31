@@ -86,16 +86,16 @@ class AttendanceSeeder extends Seeder
                 // Set waktu berdasarkan shift
                 if ($shiftType === 'Pagi') {
                     $clockIn = match ($timeMod) {
-                        0 => '07:20:00',
-                        1 => '07:10:00',
-                        2 => '08:05:00',
+                        0 => '07:30:00',
+                        1 => '07:00:00',
+                        2 => '08:10:00',
                     };
                     $clockOut = '17:00:00';
                 } else {
                     $clockIn = match ($timeMod) {
-                        0 => '12:20:00',
-                        1 => '12:10:00',
-                        2 => '13:05:00',
+                        0 => '12:30:00',
+                        1 => '12:00:00',
+                        2 => '13:10:00',
                     };
                     $clockOut = '20:00:00';
                 }

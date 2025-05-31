@@ -191,9 +191,9 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                                     Gaji Pokok Harian
                                     <br />
                                     <span className="text-red-500">(</span>
-                                    {selectedPayroll.total_attendance_days}
+                                    {selectedPayroll.total_attendance_days} hari
                                     <span className="text-yellow-500"> + </span>
-                                    {selectedPayroll.paid_holidays}
+                                    {selectedPayroll.paid_holidays} hari
                                     <span className="text-red-500">)</span>
                                     <span className="text-yellow-500"> × </span>
                                     Rp {selectedPayroll.basic_salary.toLocaleString('id-ID')}
@@ -205,13 +205,13 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                                 <TableCell>Total Gaji Lembur</TableCell>
                                 <TableCell>:</TableCell>
                                 <TableCell className="text-sm/7">
-                                    Total Lembur
+                                    Total Jam Lembur
                                     <span className="text-yellow-500"> × </span>
-                                    Gaji Lembur Harian
+                                    Uang Lembur Per Jam
                                     <br />
-                                    {selectedPayroll.total_overtime_days}
+                                    {selectedPayroll.total_overtime_hours} jam
                                     <span className="text-yellow-500"> × </span>
-                                    Rp {selectedPayroll.daily_overtime_pay.toLocaleString('id-ID')}
+                                    Rp {selectedPayroll.hourly_overtime_pay.toLocaleString('id-ID')}
                                     <br />
                                     <span className="text-blue-500">Rp {selectedPayroll.total_overtime_pay.toLocaleString('id-ID')}</span>
                                 </TableCell>
@@ -224,7 +224,7 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                                     <span className="text-yellow-500"> × </span>
                                     Bonus Tepat Waktu Harian
                                     <br />
-                                    {selectedPayroll.total_punctual_days}
+                                    {selectedPayroll.total_punctual_days} hari
                                     <span className="text-yellow-500"> × </span>
                                     Rp {selectedPayroll.bonus_amount.toLocaleString('id-ID')}
                                     <br />
@@ -239,7 +239,7 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                                     <span className="text-yellow-500"> × </span>
                                     Potongan Telat Harian
                                     <br />
-                                    {selectedPayroll.total_late_days}
+                                    {selectedPayroll.total_late_days} hari
                                     <span className="text-yellow-500"> × </span>
                                     Rp {selectedPayroll.penalty_amount.toLocaleString('id-ID')}
                                     <br />
@@ -254,6 +254,8 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                                     <span className="text-yellow-500"> + </span>
                                     Total Gaji Lembur
                                     <span className="text-yellow-500"> + </span>
+                                    Tunjangan Transportasi
+                                    <span className="text-yellow-500"> + </span>
                                     Total Bonus Tepat Waktu
                                     <span className="text-yellow-500"> - </span>
                                     Total Potongan Telat
@@ -261,6 +263,8 @@ export default function PayrollPage({ payrolls }: { payrolls: Payroll[] }) {
                                     Rp {selectedPayroll.total_basic_salary.toLocaleString('id-ID')}
                                     <span className="text-yellow-500"> + </span>
                                     Rp {selectedPayroll.total_overtime_pay.toLocaleString('id-ID')}
+                                    <span className="text-yellow-500"> + </span>
+                                    Rp {selectedPayroll.transportation_allowance.toLocaleString('id-ID')}
                                     <span className="text-yellow-500"> + </span>
                                     Rp {selectedPayroll.total_bonus.toLocaleString('id-ID')}
                                     <span className="text-yellow-500"> - </span>

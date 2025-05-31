@@ -20,7 +20,7 @@ export const useFormEmployee = () => {
         basic_salary: 0,
         paid_holidays: 0,
         transportation_allowance: 0,
-        daily_overtime_pay: 0,
+        hourly_overtime_pay: 0,
         bpjs_health: 0,
         bpjs_employment: 0,
         income_tax: 0,

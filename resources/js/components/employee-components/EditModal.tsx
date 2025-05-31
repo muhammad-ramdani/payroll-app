@@ -109,9 +109,9 @@ export default function EditModal({ open, onClose, employee, updateEmployee }: E
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Uang Lembur Harian</Label>
-                        <Input value={formatRupiah(data.daily_overtime_pay)} maxLength={11} onChange={(e) => setData('daily_overtime_pay', parseRupiah(e.target.value))} />
-                        <InputError message={errors.daily_overtime_pay} />
+                        <Label>Uang Lembur Per Jam</Label>
+                        <Input value={formatRupiah(data.hourly_overtime_pay)} maxLength={11} onChange={(e) => setData('hourly_overtime_pay', parseRupiah(e.target.value))} />
+                        <InputError message={errors.hourly_overtime_pay} />
                     </div>
 
                     <div className="grid gap-2">

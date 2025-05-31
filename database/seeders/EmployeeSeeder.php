@@ -12,7 +12,7 @@ class EmployeeSeeder extends Seeder
 {
     public function run(): void
     {
-        $names = ['Meli', 'Wina', 'Hikmah', 'Satriadi', 'Ramdani', 'Anjar', 'Ilham', 'Asep'];
+        $names = ['Meli', 'Wina', 'Hikmah', 'Satriadi', 'Dani', 'Anjar', 'Ilham', 'Asep'];
 
         foreach ($names as $name) {
             $uuid = Str::uuid();

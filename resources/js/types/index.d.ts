@@ -76,7 +76,7 @@ export interface Employee {
     basic_salary: number;
     paid_holidays: number;
     transportation_allowance: number;
-    daily_overtime_pay: number;
+    hourly_overtime_pay: number;
     bpjs_health: number;
     bpjs_employment: number;
     income_tax: number;
@@ -90,7 +90,7 @@ export interface Payroll {
     period_year: number;
     total_attendance_days: number;
     paid_holidays: number;
-    total_overtime_days: number;
+    total_overtime_hours: number;
     bonus_amount: number;
     penalty_amount: number;
     total_punctual_days: number;
@@ -98,7 +98,7 @@ export interface Payroll {
     total_bonus: number;
     total_penalty: number;
     basic_salary: number;
-    daily_overtime_pay: number;
+    hourly_overtime_pay: number;
     transportation_allowance: number;
     total_basic_salary: number;
     total_overtime_pay: number;

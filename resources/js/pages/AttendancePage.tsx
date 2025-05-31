@@ -206,7 +206,7 @@ export default function AttendancePage({
                                 {bonusPenaltySettings.bonus_amount.toLocaleString('id-ID')} per hari. Sebaliknya, jika masuk setelah pukul {attendanceRules[2].late_threshold}, akan
                                 dikenakan potongan gaji sebesar Rp {bonusPenaltySettings.penalty_amount.toLocaleString('id-ID')} per hari.
                             </li>
-                            <li>Waktu kerja yang melebihi 8.5 jam akan dianggap sebagai kerja lembur dan akan diberikan gaji lembur harian.</li>
+                            <li>Waktu kerja yang melebihi 8 jam akan dianggap sebagai kerja lembur dan akan diberikan Uang lembur Per Jam.</li>
                         </ul>
                     </div>
                 </>

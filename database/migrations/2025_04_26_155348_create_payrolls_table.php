@@ -19,7 +19,7 @@ return new class extends Migration
             // Data kehadiran dan komponen gaji
             $table->unsignedSmallInteger('total_attendance_days')->nullable();
             $table->unsignedTinyInteger('paid_holidays')->nullable();
-            $table->unsignedSmallInteger('total_overtime_days')->nullable();
+            $table->unsignedSmallInteger('total_overtime_hours')->nullable();
             
             // Komponen bonus/penalty
             $table->unsignedMediumInteger('bonus_amount')->nullable();
@@ -31,7 +31,7 @@ return new class extends Migration
 
             // Komponen penghasilan
             $table->unsignedMediumInteger('basic_salary')->nullable();
-            $table->unsignedMediumInteger('daily_overtime_pay')->nullable();
+            $table->unsignedMediumInteger('hourly_overtime_pay')->nullable();
             $table->unsignedMediumInteger('transportation_allowance')->nullable();
             $table->unsignedMediumInteger('total_basic_salary')->nullable();
             $table->unsignedMediumInteger('total_overtime_pay')->nullable();
