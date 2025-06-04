@@ -185,7 +185,7 @@ export default function PayrollCalculationPage({ payrolls }: Props) {
     const handlePaid = (id: number, salary_status: 'paid_transfer' | 'paid_cash') => {
         router.patch(`/perhitungan-penggajian/paid/${id}`, {
             salary_status,
-            confirmation_status: 'pending_confirmation'
+            confirmation_status: 'pending_confirmation',
         });
     };
 

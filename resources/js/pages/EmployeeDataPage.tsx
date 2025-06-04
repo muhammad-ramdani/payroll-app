@@ -36,14 +36,8 @@ export default function DataKaryawan() {
                 ),
                 cell: ({ row }) => row.getValue('name'),
             },
-            {
-                header: 'Username',
-                cell: ({ row }) => row.original.user.username,
-            },
-            {
-                header: 'Telepon',
-                cell: ({ row }) => row.original.phone ?? '-',
-            },
+            { header: 'Username', cell: ({ row }) => row.original.user.username },
+            { header: 'Telepon', cell: ({ row }) => row.original.phone ?? '-' },
             {
                 header: 'Aksi',
                 cell: ({ row }) => (
