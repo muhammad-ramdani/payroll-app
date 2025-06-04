@@ -17,10 +17,10 @@ import { useState } from 'react';
 export default function DataKaryawan() {
     const [employees, setEmployees] = useState<Employee[]>(usePage<{ employees: Employee[] }>().props.employees);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [detailModalOpen, setDetailModalOpen] = useState(false);
 
     const table = useReactTable({
         data: employees,
@@ -34,60 +34,58 @@ export default function DataKaryawan() {
                         <ArrowUpDown />
                     </Button>
                 ),
-                cell: ({ row }) => <div>{row.getValue('name')}</div>,
+                cell: ({ row }) => row.getValue('name'),
             },
             {
                 header: 'Username',
-                cell: ({ row }) => <div>{row.original.user.username}</div>,
+                cell: ({ row }) => row.original.user.username,
             },
             {
                 header: 'Telepon',
-                cell: ({ row }) => <div>{row.original.phone ?? '-'}</div>,
+                cell: ({ row }) => row.original.phone ?? '-',
             },
             {
                 header: 'Aksi',
-                cell: ({ row }) => {
-                    return (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    onClick={() => {
-                                        setSelectedEmployee(row.original);
-                                        setIsEditModalOpen(true);
-                                    }}
-                                >
-                                    Edit Data Karyawan
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() => {
-                                        setSelectedEmployee(row.original);
-                                        setIsDetailModalOpen(true);
-                                    }}
-                                >
-                                    Lihat Detail Data Karyawan
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    className="text-red-600"
-                                    onClick={() => {
-                                        setSelectedEmployee(row.original);
-                                        setIsDeleteModalOpen(true);
-                                    }}
-                                >
-                                    Hapus Data Karyawan
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    );
-                },
+                cell: ({ row }) => (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setSelectedEmployee(row.original);
+                                    setEditModalOpen(true);
+                                }}
+                            >
+                                Edit Data Karyawan
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setSelectedEmployee(row.original);
+                                    setDetailModalOpen(true);
+                                }}
+                            >
+                                Lihat Detail Data Karyawan
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => {
+                                    setSelectedEmployee(row.original);
+                                    setDeleteModalOpen(true);
+                                }}
+                            >
+                                Hapus Data Karyawan
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ),
             },
         ],
         getCoreRowModel: getCoreRowModel(),
@@ -113,7 +111,7 @@ export default function DataKaryawan() {
                         className="mr-2 max-w-sm"
                     />
 
-                    <Button onClick={() => setIsCreateModalOpen(true)} className="ml-auto" variant="secondary">
+                    <Button onClick={() => setCreateModalOpen(true)} className="ml-auto" variant="secondary">
                         <Plus />
                         Tambah Karyawan
                     </Button>
@@ -151,10 +149,10 @@ export default function DataKaryawan() {
                 </div>
             </div>
 
-            <CreateModal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} createEmployee={createEmployee} />
-            <EditModal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} employee={selectedEmployee} updateEmployee={updateEmployee} />
-            <DeleteModal open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} employee={selectedEmployee} deleteEmployee={deleteEmployee} />
-            <DetailModal open={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} employee={selectedEmployee} />
+            <CreateModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} createEmployee={createEmployee} />
+            <EditModal open={editModalOpen} onClose={() => setEditModalOpen(false)} employee={selectedEmployee} updateEmployee={updateEmployee} />
+            <DeleteModal open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} employee={selectedEmployee} deleteEmployee={deleteEmployee} />
+            <DetailModal open={detailModalOpen} onClose={() => setDetailModalOpen(false)} employee={selectedEmployee} />
         </AppLayout>
     );
 }
