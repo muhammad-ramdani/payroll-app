@@ -8,11 +8,7 @@ import { Head } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
-interface Props {
-    attendances: Attendance[];
-}
-
-export default function AttendanceReportForAdminPage({ attendances }: Props) {
+export default function AttendanceReportForAdminPage({ attendances }: { attendances: Attendance[] }) {
     // Memo: Daftar unik karyawan dari data Presensi
     const employees = useMemo(() => {
         const uniqueEmployees = new Map<string, User>();

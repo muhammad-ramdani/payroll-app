@@ -26,23 +26,11 @@ const attendanceStatus = {
     sick: ['Libur Sakit', 'text-fuchsia-500 bg-fuchsia-500/10'],
 };
 
-// Komponen Utilitas
-// -----------------------------------------------------------------------------
-/**
- * Komponen badge untuk menampilkan status kehadiran
- * @param status - Status kehadiran dari Attendance
- */
 const AttendanceStatusBadge = ({ status }: { status: Attendance['status'] }) => {
     const [label, className] = attendanceStatus[status];
     return <Badge className={className}>{label}</Badge>;
 };
 
-/**
- * Menghitung durasi kerja berdasarkan jam masuk dan keluar
- * @param clockInTime - Waktu masuk (format HH:mm:ss)
- * @param clockOutTime - Waktu keluar (format HH:mm:ss)
- * @param currentTimestamp - Timestamp saat ini untuk kalkulasi real-time
- */
 const calculateWorkingDuration = (clockInTime?: string | null, clockOutTime?: string | null, currentTimestamp = Date.now()): string => {
     if (!clockInTime) return '-';
 
@@ -109,13 +97,13 @@ export default function AttendanceMonitoringPage() {
     // -------------------------------------------------------------------------
     const tableColumns = useMemo<ColumnDef<Attendance>[]>(
         () => [
-            { header: 'Nama', cell: ({ row }) => <span>{row.original.user.name}</span> },
+            { header: 'Nama', cell: ({ row }) => row.original.user.name },
             {
                 header: 'Shift',
                 cell: ({ row }) => <span className={`${row.original.shift_type === 'Pagi' ? 'text-blue-500' : 'text-yellow-500'}`}>{row.original.shift_type}</span>,
             },
-            { header: 'Jam Masuk', cell: ({ row }) => <span>{row.original.clock_in ?? '-'}</span> },
-            { header: 'Jam Pulang', cell: ({ row }) => <span>{row.original.clock_out ?? '-'}</span> },
+            { header: 'Jam Masuk', cell: ({ row }) => row.original.clock_in ?? '-' },
+            { header: 'Jam Pulang', cell: ({ row }) => row.original.clock_out ?? '-' },
             {
                 header: 'Waktu Kerja',
                 cell: ({ row }) => calculateWorkingDuration(row.original.clock_in, row.original.clock_out, currentTimestamp),
