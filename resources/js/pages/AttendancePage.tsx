@@ -1,15 +1,10 @@
-// AttendancePage.tsx
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { calculateDistance, getCurrentPosition } from '@/utils/geolocation';
 import { Head, router } from '@inertiajs/react';
 import { useCallback, useEffect, useState } from 'react';
-
-// Komponen UI Kustom
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-
-// Tipe Data dan Konstanta
 import { Attendance, AttendanceBonusPenaltySetting, AttendanceRule } from '@/types';
 import { ClockArrowDown, ClockArrowUp } from 'lucide-react';
 
